@@ -4,9 +4,9 @@ import { useMutation } from "@tanstack/react-query";
 import type { APIError } from "better-auth";
 import { toast } from "sonner";
 
-import { signIn, signOut } from "@/lib/auth-client";
+import { authClient, signIn, signOut } from "@/lib/auth-client";
 
-export function useSignOutMutation() {
+export function useLogoutMutation() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -56,6 +56,32 @@ export function useSignInWithGoogle() {
     },
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await authClient.deleteUser({
+        callbackURL: `/goodbye`,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      router.push("/login");
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error) => {
+      console.error(error);
     },
   });
 }

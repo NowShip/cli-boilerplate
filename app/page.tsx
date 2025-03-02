@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTask, deleteTask, getTasks } from "@/lib/action";
 import { useGetUser } from "@/hooks/useGetUser";
-import { useSignOutMutation } from "@/hooks/useAuth";
+import { useLogoutMutation } from "@/hooks/useAuth";
+import UserProfile from "@/components/user-profile";
 
 export default function Home() {
   const { data: user, isPending: isUserPending } = useGetUser();
-  const signOutMutation = useSignOutMutation();
+  const { mutate: signOut } = useLogoutMutation();
 
   const queryClient = useQueryClient();
 
@@ -45,6 +46,7 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-sm py-12">
       <div className="mb-8 flex items-center gap-4">
+        <UserProfile />
         {isUserPending ? (
           "Loading..."
         ) : !user ? (
@@ -53,7 +55,7 @@ export default function Home() {
             <Link href="/sign-up">Signup</Link>
           </>
         ) : (
-          <Button onClick={() => signOutMutation.mutate()}>Logout</Button>
+          <Button onClick={() => signOut()}>Logout</Button>
         )}
       </div>
       <h1 className="mb-4 text-2xl font-bold">Tasks</h1>
