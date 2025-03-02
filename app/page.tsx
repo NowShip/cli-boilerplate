@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Trash2Icon } from "lucide-react";
@@ -7,8 +8,13 @@ import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTask, deleteTask, getTasks } from "@/lib/action";
+import { useGetUser } from "@/hooks/useGetUser";
+import { useSignOutMutation } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { data: user, isPending: isUserPending } = useGetUser();
+  const signOutMutation = useSignOutMutation();
+
   const queryClient = useQueryClient();
 
   const tasks = useQuery({
@@ -38,6 +44,18 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-sm py-12">
+      <div className="mb-8 flex items-center gap-4">
+        {isUserPending ? (
+          "Loading..."
+        ) : !user ? (
+          <>
+            <Link href="/login">Login</Link>
+            <Link href="/sign-up">Signup</Link>
+          </>
+        ) : (
+          <Button onClick={() => signOutMutation.mutate()}>Logout</Button>
+        )}
+      </div>
       <h1 className="mb-4 text-2xl font-bold">Tasks</h1>
       <ul>
         {tasks.isPending
@@ -56,6 +74,7 @@ export default function Home() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteTaskMutation.mutate(task.id)}
+                      disabled={!user}
                     >
                       <Trash2Icon className="h-4 w-4" />
                     </Button>
@@ -66,6 +85,12 @@ export default function Home() {
         className="mt-8"
         onSubmit={(event) => {
           event.preventDefault();
+
+          if (!user) {
+            toast.error("You must be logged in to create a task");
+            return;
+          }
+
           const formData = new FormData(event.target as HTMLFormElement);
           const title = formData.get("title") as string;
           createTaskMutation.mutate(title, {
