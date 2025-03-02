@@ -35,8 +35,8 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <ReactQueryDevtools initialIsOpen={false} />
         </body>
-        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProviders>
     </html>
   );

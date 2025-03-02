@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
 import { useGetUser } from "@/hooks/useGetUser";
+import { useSignInWithGoogle } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -31,6 +32,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { data: user } = useGetUser();
+  const signInWithGoogleMutation = useSignInWithGoogle();
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -109,7 +111,12 @@ export default function SignupPage() {
             )}
           />
           <p className="text-muted-foreground text-center text-sm">Or</p>
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => signInWithGoogleMutation.mutate()}
+            disabled={signInWithGoogleMutation.isPending}
+          >
             Sign up with Google
           </Button>
           <Button type="submit" disabled={form.formState.isSubmitting}>
