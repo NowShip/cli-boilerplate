@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-types": "tsc --pretty --noEmit",
+    "check-format": "prettier --check .",
+    "check-lint": "eslint . --ext ts --ext tsx --ext js",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -35,6 +39,8 @@
     "drizzle-kit": "^0.30.5",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
+    "prettier": "^3.5.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"

@@ -37,27 +37,30 @@ export default function Home() {
   });
 
   return (
-    <div className="max-w-sm mx-auto py-12">
-      <h1 className="text-2xl font-bold mb-4">Tasks</h1>
+    <div className="mx-auto max-w-sm py-12">
+      <h1 className="mb-4 text-2xl font-bold">Tasks</h1>
       <ul>
         {tasks.isPending
           ? "Loading..."
           : tasks.isError
-          ? "error.."
-          : tasks.data.length === 0
-          ? "No tasks"
-          : tasks.data.map((task) => (
-              <li key={task.id} className="flex justify-between items-center">
-                {task.title}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteTaskMutation.mutate(task.id)}
-                >
-                  <Trash2Icon className="w-4 h-4" />
-                </Button>
-              </li>
-            ))}
+            ? "error.."
+            : tasks.data.length === 0
+              ? "No tasks"
+              : tasks.data.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center justify-between"
+                  >
+                    {task.title}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteTaskMutation.mutate(task.id)}
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
       </ul>
       <form
         className="mt-8"
