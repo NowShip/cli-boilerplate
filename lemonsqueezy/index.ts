@@ -5,94 +5,6 @@ import { db } from "@/db";
 import { webhookEvents } from "@/db/schema";
 import type { WebhookEvent } from "@/db/schema";
 
-// TYPES
-
-export type LemonSqueezyCustomerMetadata = {
-  user_id: string;
-};
-
-export type LemonSqueezyEventName =
-  | "order_created"
-  | "subscription_created"
-  | "subscription_payment_success"
-  | "subscription_updated"
-  | "subscription_expired";
-
-interface MetaBody {
-  test_mode: boolean;
-  event_name: LemonSqueezyEventName;
-  webhook_id: string;
-  custom_data: LemonSqueezyCustomerMetadata;
-}
-
-export type LemonSqueezyOrderAttributes = {
-  data: {
-    id: string;
-    type: string;
-    links: {
-      self: string;
-    };
-    attributes: {
-      tax: number;
-      urls: {
-        receipt: string;
-      };
-      total: number;
-      status: string;
-      tax_usd: number;
-      currency: string;
-      refunded: boolean;
-      store_id: number;
-      subtotal: number;
-      tax_name: string;
-      tax_rate: number;
-      setup_fee: number;
-      test_mode: boolean;
-      total_usd: number;
-      user_name: string;
-      created_at: string;
-      identifier: string;
-      updated_at: string;
-      user_email: string;
-      customer_id: number;
-      refunded_at: any;
-      order_number: number;
-      subtotal_usd: number;
-      currency_rate: string;
-      setup_fee_usd: number;
-      tax_formatted: string;
-      tax_inclusive: boolean;
-      discount_total: number;
-      refunded_amount: number;
-      total_formatted: string;
-      first_order_item: {
-        id: number;
-        price: number;
-        order_id: number;
-        price_id: number;
-        quantity: number;
-        test_mode: boolean;
-        created_at: string;
-        product_id: number;
-        updated_at: string;
-        variant_id: number;
-        product_name: string;
-        variant_name: string;
-      };
-      status_formatted: string;
-      discount_total_usd: number;
-      subtotal_formatted: string;
-      refunded_amount_usd: number;
-      setup_fee_formatted: string;
-      discount_total_formatted: string;
-      refunded_amount_formatted: string;
-    };
-  };
-  meta: MetaBody;
-};
-
-// END TYPES
-
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -162,4 +74,140 @@ export async function storeWebhookEvent(
     .returning();
 
   return returnedValue[0];
+}
+
+// TYPES
+
+export type LemonSqueezyCustomerMetadata = {
+  user_id: string;
+};
+
+export type LemonSqueezyEventName =
+  | "order_created"
+  | "subscription_created"
+  | "subscription_payment_success"
+  | "subscription_updated"
+  | "subscription_expired";
+
+interface MetaBody {
+  test_mode: boolean;
+  event_name: LemonSqueezyEventName;
+  webhook_id: string;
+  custom_data: LemonSqueezyCustomerMetadata;
+}
+
+export interface LemonSqueezyOrderAttributes {
+  data: {
+    id: string;
+    type: string;
+    links: {
+      self: string;
+    };
+    attributes: {
+      tax: number;
+      urls: {
+        receipt: string;
+      };
+      total: number;
+      status: string;
+      tax_usd: number;
+      currency: string;
+      refunded: boolean;
+      store_id: number;
+      subtotal: number;
+      tax_name: string;
+      tax_rate: number;
+      setup_fee: number;
+      test_mode: boolean;
+      total_usd: number;
+      user_name: string;
+      created_at: string;
+      identifier: string;
+      updated_at: string;
+      user_email: string;
+      customer_id: number;
+      refunded_at: any;
+      order_number: number;
+      subtotal_usd: number;
+      currency_rate: string;
+      setup_fee_usd: number;
+      tax_formatted: string;
+      tax_inclusive: boolean;
+      discount_total: number;
+      refunded_amount: number;
+      total_formatted: string;
+      first_order_item: {
+        id: number;
+        price: number;
+        order_id: number;
+        price_id: number;
+        quantity: number;
+        test_mode: boolean;
+        created_at: string;
+        product_id: number;
+        updated_at: string;
+        variant_id: number;
+        product_name: string;
+        variant_name: string;
+      };
+      status_formatted: string;
+      discount_total_usd: number;
+      subtotal_formatted: string;
+      refunded_amount_usd: number;
+      setup_fee_formatted: string;
+      discount_total_formatted: string;
+      refunded_amount_formatted: string;
+    };
+  };
+  meta: MetaBody;
+}
+
+export interface LemonSqueezySubscriptionAttributes {
+  data: {
+    id: string;
+    type: string;
+    links: {
+      self: string;
+    };
+    attributes: {
+      urls: {
+        customer_portal: string;
+        update_payment_method: string;
+        customer_portal_update_subscription: string;
+      };
+      pause: any;
+      status: string;
+      ends_at: any;
+      order_id: number;
+      store_id: number;
+      cancelled: boolean;
+      renews_at: string;
+      test_mode: boolean;
+      user_name: string;
+      card_brand: string;
+      created_at: string;
+      product_id: number;
+      updated_at: string;
+      user_email: string;
+      variant_id: number;
+      customer_id: number;
+      product_name: string;
+      variant_name: string;
+      order_item_id: number;
+      trial_ends_at: any;
+      billing_anchor: number;
+      card_last_four: string;
+      status_formatted: string;
+      first_subscription_item: {
+        id: number;
+        price_id: number;
+        quantity: number;
+        created_at: string;
+        updated_at: string;
+        is_usage_based: boolean;
+        subscription_id: number;
+      };
+    };
+  };
+  meta: MetaBody;
 }

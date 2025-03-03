@@ -1,18 +1,23 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { getPrice } from "@lemonsqueezy/lemonsqueezy.js";
+
 import {
   Order,
   orders,
   plans,
+  Subscription,
+  subscriptions,
   webhookEvents,
   type WebhookEvent,
 } from "@/db/schema";
 import {
   configureLemonSqueezy,
   LemonSqueezyOrderAttributes,
+  LemonSqueezySubscriptionAttributes,
   webhookHasData,
 } from ".";
-import { eq } from "drizzle-orm";
 import { db } from "@/db";
 
 export async function processWebhookEvent(webhookEvent: WebhookEvent) {
@@ -32,11 +37,66 @@ export async function processWebhookEvent(webhookEvent: WebhookEvent) {
   let processingError = "";
   const eventBody = webhookEvent.body;
 
-  if (webhookEvent.eventName.startsWith("subscription_payment_")) {
-    // Save subscription invoices; eventBody is a SubscriptionInvoice
-    // Not implemented.
-  } else if (webhookEvent.eventName.startsWith("subscription_")) {
+  if (
+    webhookEvent.eventName.startsWith("subscription_") &&
+    webhookHasData<LemonSqueezySubscriptionAttributes>(eventBody)
+  ) {
     // Save subscription events; obj is a Subscription
+    const attributes = eventBody.data.attributes;
+    const variantId = attributes.variant_id;
+    const meta = eventBody.meta;
+
+    // We assume that the Plan table is up to date.
+    const [plan] = await db
+      .select()
+      .from(plans)
+      .where(eq(plans.variantId, parseInt(variantId.toString(), 10)));
+
+    if (!plan) {
+      processingError = `Plan #${variantId} not found in the database.`;
+    } else {
+      const priceId = attributes.first_subscription_item.price_id;
+
+      const priceData = await getPrice(priceId);
+      if (priceData.error) {
+        processingError = `Failed to get the price data for the subscription ${eventBody.data.id}.`;
+      }
+
+      const isUsageBased = attributes.first_subscription_item.is_usage_based;
+      const price = isUsageBased
+        ? priceData.data?.data.attributes.unit_price_decimal
+        : priceData.data?.data.attributes.unit_price;
+
+      const updateData: Subscription = {
+        subscriptionId: eventBody.data.id,
+        orderId: attributes.order_id,
+        name: attributes.user_name,
+        email: attributes.user_email,
+        status: attributes.status,
+        statusFormatted: attributes.status_formatted,
+        renewsAt: attributes.renews_at,
+        endsAt: attributes.ends_at,
+        trialEndsAt: attributes.trial_ends_at,
+        price: price?.toString() ?? "",
+        isPaused: false,
+        subscriptionItemId: attributes.first_subscription_item.id,
+        isUsageBased: attributes.first_subscription_item.is_usage_based,
+        variantId: plan.variantId,
+        variantName: plan.name,
+        cardLastFour: attributes.card_last_four,
+        cardBrand: attributes.card_brand,
+        userId: meta.custom_data.user_id,
+      };
+
+      try {
+        await db.insert(subscriptions).values(updateData).onConflictDoUpdate({
+          target: subscriptions.subscriptionId,
+          set: updateData,
+        });
+      } catch (error) {
+        processingError = `Failed to upsert Subscription #${updateData.subscriptionId} to the database. ${error}`;
+      }
+    }
   } else if (
     webhookEvent.eventName.startsWith("order_") &&
     webhookHasData<LemonSqueezyOrderAttributes>(eventBody)

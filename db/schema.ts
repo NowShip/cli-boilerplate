@@ -96,7 +96,7 @@ export const plans = pgTable("plan", {
 
 export const subscriptions = pgTable("subscription", {
   id: serial("id").primaryKey(),
-  lemonSqueezyId: text("lemonSqueezyId").unique().notNull(),
+  subscriptionId: text("subscriptionId").unique().notNull(),
   orderId: integer("orderId").notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -115,6 +115,7 @@ export const subscriptions = pgTable("subscription", {
   cardLastFour: text("cardLastFour"),
   cardBrand: text("cardBrand"),
   variantName: text("variantName").notNull(),
+  userId: text("userId").notNull(),
 });
 
 export const orders = pgTable("order", {
