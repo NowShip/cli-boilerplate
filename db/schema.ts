@@ -5,6 +5,8 @@ import {
   varchar,
   timestamp,
   boolean,
+  serial,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const tasksTable = pgTable("tasks", {
@@ -67,8 +69,76 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at"),
 });
 
-export type Task = typeof tasksTable.$inferSelect;
-export type User = typeof user.$inferSelect;
-export type Session = typeof session.$inferSelect;
-export type Account = typeof account.$inferSelect;
-export type Verification = typeof verification.$inferSelect;
+export const webhookEvents = pgTable("webhookEvent", {
+  id: integer("id").primaryKey(),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  eventName: text("eventName").notNull(),
+  processed: boolean("processed").default(false),
+  body: jsonb("body").notNull(),
+  processingError: text("processingError"),
+});
+
+export const plans = pgTable("plan", {
+  id: serial("id").primaryKey().notNull(),
+  productId: integer("productId").notNull(),
+  productName: text("productName"),
+  variantId: integer("variantId").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  isUsageBased: boolean("isUsageBased").default(false),
+  interval: text("interval"),
+  intervalCount: integer("intervalCount"),
+  trialInterval: text("trialInterval"),
+  trialIntervalCount: integer("trialIntervalCount"),
+  sort: integer("sort"),
+});
+
+export const subscriptions = pgTable("subscription", {
+  id: serial("id").primaryKey(),
+  lemonSqueezyId: text("lemonSqueezyId").unique().notNull(),
+  orderId: integer("orderId").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  status: text("status").notNull(),
+  statusFormatted: text("statusFormatted").notNull(),
+  renewsAt: text("renewsAt"),
+  endsAt: text("endsAt"),
+  trialEndsAt: text("trialEndsAt"),
+  price: text("price").notNull(),
+  isUsageBased: boolean("isUsageBased").default(false),
+  isPaused: boolean("isPaused").default(false),
+  subscriptionItemId: serial("subscriptionItemId"),
+  variantId: integer("variantId")
+    .notNull()
+    .references(() => plans.variantId),
+  cardLastFour: text("cardLastFour"),
+  cardBrand: text("cardBrand"),
+  variantName: text("variantName").notNull(),
+});
+
+export const orders = pgTable("order", {
+  id: serial("id").primaryKey(),
+  orderId: text("orderId").unique().notNull(),
+  refunded: boolean("refunded").default(false),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  status: text("status").notNull(),
+  variantId: integer("variantId")
+    .notNull()
+    .references(() => plans.variantId),
+  productName: text("productName").notNull(),
+  userId: text("userId").notNull(),
+});
+
+export type Task = typeof tasksTable.$inferInsert;
+export type User = typeof user.$inferInsert;
+export type Session = typeof session.$inferInsert;
+export type Account = typeof account.$inferInsert;
+export type Verification = typeof verification.$inferInsert;
+export type WebhookEvent = typeof webhookEvents.$inferInsert;
+export type Plan = typeof plans.$inferInsert;
+export type Subscription = typeof subscriptions.$inferInsert;
+export type Order = typeof orders.$inferInsert;
