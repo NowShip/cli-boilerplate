@@ -28,6 +28,7 @@ import ClientOnly from "@/components/client-only";
 import PlansDialog from "@/components/plans-dialog";
 import { Badge } from "@/components/ui/badge";
 import DeleteUser from "./delete-user";
+import { SubscriptionActions } from "./subscription-actions";
 
 interface UserProfileProps {
   children?: React.ReactNode;
@@ -154,81 +155,57 @@ function SubscriptionButton() {
   const getCustomerPortalUrl = useGetCustomerPortalUrl();
   const subscriptionSettings = useSubscriptionSettings();
 
-  return (
-    <div className="flex flex-col gap-2">
+  const { status } = userSubscription.data || {};
+
+  if (status === "paused") {
+    return (
       <Button
         variant="outline"
         className="w-full"
         size="sm"
         onClick={() =>
-          getCustomerPortalUrl.mutate({
+          subscriptionSettings.mutate({
             subscriptionId: userSubscription.data?.subscriptionId || "",
+            type: "unpause",
           })
         }
+        disabled={subscriptionSettings.isPending}
       >
-        Manage Subscription
+        Unpause Subscription
       </Button>
-      {status !== "cancelled" ? (
-        status === "active" ? (
-          <Button
-            className="w-full"
-            size="sm"
-            onClick={() =>
-              subscriptionSettings.mutate({
-                subscriptionId: userSubscription.data?.subscriptionId || "",
-                type: "pause",
-              })
-            }
-            disabled={subscriptionSettings.isPending}
-          >
-            Pause Subscription
-          </Button>
-        ) : (
-          <Button
-            className="w-full"
-            size="sm"
-            onClick={() =>
-              subscriptionSettings.mutate({
-                subscriptionId: userSubscription.data?.subscriptionId || "",
-                type: "unpause",
-              })
-            }
-            disabled={subscriptionSettings.isPending}
-          >
-            Unpause Subscription
-          </Button>
-        )
-      ) : null}
-      {status === "cancelled" ? (
-        <Button
-          className="w-full"
-          size="sm"
-          onClick={() =>
-            subscriptionSettings.mutate({
-              subscriptionId: userSubscription.data?.subscriptionId || "",
-              type: "resume",
-            })
-          }
-          disabled={subscriptionSettings.isPending}
-        >
-          Resume Subscription
+    );
+  }
+
+  if (status === "cancelled") {
+    return (
+      <Button
+        variant="outline"
+        className="w-full"
+        size="sm"
+        onClick={() =>
+          subscriptionSettings.mutate({
+            subscriptionId: userSubscription.data?.subscriptionId || "",
+            type: "resume",
+          })
+        }
+        disabled={subscriptionSettings.isPending}
+      >
+        Resume Subscription
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <PlansDialog overlayClassName="bg-transparent">
+        <Button variant="outline" className="w-full" size="sm">
+          Change Plan
         </Button>
-      ) : (
-        <Button
-          variant="destructive"
-          className="w-full"
-          size="sm"
-          onClick={() =>
-            subscriptionSettings.mutate({
-              subscriptionId: userSubscription.data?.subscriptionId || "",
-              type: "cancel",
-            })
-          }
-          disabled={subscriptionSettings.isPending}
-        >
-          Cancel Subscription
-        </Button>
-      )}
+      </PlansDialog>
+      <SubscriptionActions
+        subscriptionId={userSubscription.data?.subscriptionId || ""}
+        renewAt={userSubscription.data?.renewsAt || ""}
+      />
     </div>
   );
 }

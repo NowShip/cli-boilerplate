@@ -3,17 +3,20 @@
 import { useState, useEffect } from "react";
 import { CheckIcon, RefreshCcwIcon } from "lucide-react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
+
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn, formatPrice } from "@/lib/utils";
@@ -21,7 +24,9 @@ import {
   useCreateSubscription,
   useGetPlans,
   useGetUserSubscription,
+  useSubscriptionSettings,
 } from "@/lemonsqueezy/queries";
+import { Badge } from "./ui/badge";
 
 interface PlansDialogProps {
   children?: React.ReactNode;
@@ -40,25 +45,32 @@ export default function PlansDialog({
     false
   );
 
+  const [open, setOpen] = useState(false);
+
   const plans = useGetPlans();
   const userSubscription = useGetUserSubscription();
   const createSubscription = useCreateSubscription();
+  const updateSubscription = useSubscriptionSettings();
 
   const isChangePlan = userSubscription.data?.status === "active";
 
   useEffect(() => {
-    if (plans.data && !selectedPlan) {
+    if (userSubscription.data?.variantId) {
+      setSelectedPlan(userSubscription.data?.variantId.toString());
+    } else if (plans.data && !selectedPlan) {
       setSelectedPlan(plans.data?.[1].variantId.toString());
     }
   }, [plans.data]);
 
   return (
-    <Dialog
-      open={!children ? showPlanDialog : undefined}
-      onOpenChange={!children ? setShowPlanDialog : undefined}
+    <AlertDialog
+      open={!children ? showPlanDialog : open}
+      onOpenChange={!children ? setShowPlanDialog : setOpen}
     >
-      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
-      <DialogContent
+      {children ? (
+        <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      ) : null}
+      <AlertDialogContent
         className={cn(className)}
         overlayClassName={overlayClassName}
       >
@@ -69,20 +81,20 @@ export default function PlansDialog({
           >
             <RefreshCcwIcon className="opacity-80" size={16} />
           </div>
-          <DialogHeader>
-            <DialogTitle className="text-left">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-left">
               {isChangePlan ? "Change your plan" : "Upgrade"}
-            </DialogTitle>
-            <DialogDescription className="text-left">
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
               Pick one of the following plans.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
         </div>
 
         <form className="space-y-5">
           <RadioGroup
             className="gap-2"
-            defaultValue={plans.data?.[1].variantId.toString()}
+            defaultValue={selectedPlan || ""}
             onValueChange={setSelectedPlan}
           >
             {plans.data
@@ -100,7 +112,10 @@ export default function PlansDialog({
                   />
                   <div className="grid grow gap-1">
                     <Label htmlFor={plan.variantId.toString()}>
-                      {plan.name}
+                      {plan.name}{" "}
+                      {plan.variantId === userSubscription.data?.variantId && (
+                        <Badge>Current plan</Badge>
+                      )}
                     </Label>
                     {plan.price !== 0 ? (
                       <p
@@ -171,9 +186,54 @@ export default function PlansDialog({
             </ul>
           </div>
 
+          <div className="space-y-4">
+            <p className="font-medium">How billing works:</p>
+            <ul className="text-muted-foreground space-y-2 text-sm">
+              <li>
+                <span className="font-medium">Upgrading:</span> Immediate
+                access. You'll only be charged the pro-rated difference for the
+                remaining period.
+              </li>
+              <li>
+                <span className="font-medium">Downgrading:</span> Continues
+                current plan until{" "}
+                {userSubscription.data?.renewsAt
+                  ? format(
+                      new Date(userSubscription.data?.renewsAt),
+                      "MMMM d, yyyy"
+                    )
+                  : "the end of your current billing period"}
+                , then switches to new plan.
+              </li>
+            </ul>
+          </div>
+
           <div className="grid gap-2">
             {isChangePlan ? (
-              <Button type="button" className="w-full">
+              <Button
+                type="button"
+                className="w-full"
+                disabled={
+                  (selectedPlan || "") ===
+                    userSubscription.data?.variantId?.toString() ||
+                  updateSubscription.isPending
+                }
+                onClick={() =>
+                  updateSubscription.mutate(
+                    {
+                      subscriptionId:
+                        userSubscription.data?.subscriptionId || "",
+                      type: "change_plan",
+                      variantId: selectedPlan || "",
+                    },
+                    {
+                      onSuccess: () => {
+                        setOpen(false);
+                      },
+                    }
+                  )
+                }
+              >
                 Change plan
               </Button>
             ) : (
@@ -189,14 +249,21 @@ export default function PlansDialog({
                 Upgrade
               </Button>
             )}
-            <DialogClose asChild>
-              <Button type="button" variant="ghost" className="w-full">
+            <AlertDialogCancel asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                disabled={
+                  createSubscription.isPending || updateSubscription.isPending
+                }
+              >
                 Cancel
               </Button>
-            </DialogClose>
+            </AlertDialogCancel>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

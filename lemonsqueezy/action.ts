@@ -240,10 +240,15 @@ export async function createCheckout({
   }
 }
 
-export async function subscriptionSettings(
-  subscriptionId: string,
-  type: LemonSqueezySubscriptionTypes
-): Promise<ServerResponse<string>> {
+export async function subscriptionSettings({
+  subscriptionId,
+  type,
+  variantId,
+}: {
+  subscriptionId: string;
+  type: LemonSqueezySubscriptionTypes;
+  variantId?: string;
+}): Promise<ServerResponse<string>> {
   try {
     if (!subscriptionId) {
       return {
@@ -279,6 +284,18 @@ export async function subscriptionSettings(
 
       return {
         data: "Subscription cancelled",
+      };
+    }
+
+    if (type === "change_plan") {
+      if (!variantId) {
+        return {
+          message: "Variant ID is required",
+        };
+      }
+
+      attributes = {
+        variant_id: variantId,
       };
     }
 

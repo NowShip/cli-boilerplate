@@ -82,11 +82,17 @@ export const useSubscriptionSettings = () => {
     mutationFn: async ({
       subscriptionId,
       type,
+      variantId,
     }: {
       subscriptionId: string;
       type: LemonSqueezySubscriptionTypes;
+      variantId?: string;
     }) => {
-      const response = await subscriptionSettings(subscriptionId, type);
+      const response = await subscriptionSettings({
+        subscriptionId,
+        type,
+        variantId,
+      });
 
       if (response.message) {
         throw new Error(response.message);

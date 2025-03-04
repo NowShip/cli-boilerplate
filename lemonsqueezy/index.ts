@@ -98,7 +98,8 @@ export type LemonSqueezySubscriptionTypes =
   | "pause"
   | "unpause"
   | "resume"
-  | "cancel";
+  | "cancel"
+  | "change_plan";
 
 export type LemonSqueezyEventName =
   | "order_created"
