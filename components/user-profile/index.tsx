@@ -1,74 +1,89 @@
-import { useState } from "react";
-import { format } from "date-fns";
+"use client";
+
 import { CalendarIcon, CreditCardIcon } from "lucide-react";
+import { format } from "date-fns";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useGetUser } from "@/hooks/useGetUser";
-import { useDeleteAccount, useLogoutMutation } from "@/hooks/useAuth";
-
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "./ui/badge";
-
-import {
-  useGetUserSubscription,
   useGetCustomerPortalUrl,
+  useGetUserSubscription,
   useSubscriptionSettings,
 } from "@/lemonsqueezy/queries";
-import ClientOnly from "./client-only";
-import PlansDialog from "./plans-dialog";
+import { useDeleteAccount } from "@/hooks/useAuth";
+import ClientOnly from "@/components/client-only";
+import PlansDialog from "@/components/plans-dialog";
+import { Badge } from "@/components/ui/badge";
+import DeleteUser from "./delete-user";
 
-export default function UserProfile() {
+interface UserProfileProps {
+  children?: React.ReactNode;
+}
+
+export default function UserProfile({ children }: UserProfileProps) {
   const { data: user } = useGetUser();
-  const { mutate: signOut } = useLogoutMutation();
-  const deleteAccount = useDeleteAccount();
-
   const userSubscription = useGetUserSubscription();
-
-  const [open, setOpen] = useState(false);
-
-  if (!user) return null;
+  const deleteAccount = useDeleteAccount();
 
   const { status, variantName, cardBrand, cardLastFour, renewsAt } =
     userSubscription.data || {};
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Avatar>
-          <AvatarImage src={user.user.image ?? undefined} />
-          <AvatarFallback>
-            {user.user.name.charAt(0)}
-            {user.user.name.charAt(1)}
-          </AvatarFallback>
-        </Avatar>
-      </DialogTrigger>
-      <DialogContent className="flex flex-col items-center gap-2 text-center sm:max-w-80">
-        <Avatar className="h-18 w-18">
-          <AvatarImage src={user.user.image ?? undefined} />
-          <AvatarFallback>
-            {user.user.name.charAt(0)}
-            {user.user.name.charAt(1)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="overflow-hidden">
-          <p className="truncate text-sm font-medium">{user.user.name}</p>
-          <p className="truncate text-xs text-gray-500">{user.user.email}</p>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-6 py-4 text-base">
+            Profile
+          </DialogTitle>
+          <DialogClose className="translate-y-0.5" />
+        </DialogHeader>
+        <div className="mt-4 px-6">
+          <div className="border-background bg-muted relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 shadow-xs shadow-black/10">
+            <Avatar>
+              <AvatarImage src={user?.user?.image || ""} />
+              <AvatarFallback>{user?.user?.name?.charAt(0)}</AvatarFallback>
+            </Avatar>
+          </div>
         </div>
-        <Separator className="my-4" />
-        <div className="w-full space-y-6 rounded-lg border p-4">
+        <div className="space-y-4 px-6 pt-4 pb-6">
+          <button className="sr-only"></button>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={`name`}>Name</Label>
+            <Input
+              id={`name`}
+              placeholder="Matt"
+              defaultValue={user?.user?.name}
+              type="text"
+              readOnly
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={`email`}>Email</Label>
+            <Input
+              id={`email`}
+              placeholder="matt@example.com"
+              defaultValue={user?.user?.email}
+              type="text"
+              readOnly
+            />
+          </div>
+        </div>
+        <Separator />
+        <div className="w-full space-y-6 p-4">
           {/* Subscription Header */}
           {status ? (
             <div className="flex items-center justify-between">
@@ -119,59 +134,16 @@ export default function UserProfile() {
           {!status ? (
             <ClientOnly>
               <PlansDialog overlayClassName="bg-transparent">
-                <Button className="w-full" size="sm">
-                  Upgrade to Pro
-                </Button>
+                <Button className="w-full">Upgrade to Pro</Button>
               </PlansDialog>
             </ClientOnly>
           ) : (
             <SubscriptionButton />
           )}
         </div>
-        <Separator className="my-4" />
-        <div className="flex w-full flex-col gap-2">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() =>
-              signOut(undefined, {
-                onSuccess: () => {
-                  setOpen(false);
-                },
-              })
-            }
-          >
-            Logout
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full">
-                Delete Account
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="px-0">
-                  <Button
-                    variant="destructive"
-                    onClick={() => deleteAccount.mutate()}
-                    disabled={deleteAccount.isPending}
-                  >
-                    Delete Account
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <DialogFooter className="border-t px-6 py-4">
+          <DeleteUser />
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 
 import { useGetUserSubscription } from "@/lemonsqueezy/queries";
 import Pricing from "@/components/pricing";
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 
 export default function Home() {
   const { data: user, isPending: isUserPending } = useGetUser();
@@ -20,7 +22,12 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-sm py-12">
       <div className="mb-8 flex items-center gap-4">
-        <UserProfile />
+        <UserProfile>
+          <Avatar>
+            <AvatarImage src={user?.user.image || ""} />
+            <AvatarFallback>{user?.user.name?.charAt(0) || "U"}</AvatarFallback>
+          </Avatar>
+        </UserProfile>
         {isUserPending ? (
           "Loading..."
         ) : !user ? (
