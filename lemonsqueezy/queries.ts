@@ -10,6 +10,23 @@ import {
 import { useGetUser } from "@/hooks/useGetUser";
 import { toast } from "sonner";
 import type { LemonSqueezySubscriptionTypes } from "./index";
+import { getPlans } from "@/lib/action";
+
+export const useGetPlans = () => {
+  return useQuery({
+    queryKey: ["plans"],
+    queryFn: async () => {
+      const response = await getPlans();
+
+      if (response.message) {
+        throw new Error(response.message);
+      }
+
+      return response.data;
+    },
+    retry: false,
+  });
+};
 
 export const useGetUserSubscription = () => {
   const { data: user } = useGetUser();

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { plans, tasksTable } from "@/db/schema";
+import { Plan, plans, tasksTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function createTask(title: string) {
@@ -20,16 +20,17 @@ export async function updateTask(id: number, title: string) {
   await db.update(tasksTable).set({ title }).where(eq(tasksTable.id, id));
 }
 
-export async function getPlans() {
+export async function getPlans(): Promise<ServerResponse<Plan[]>> {
   try {
-    return await db.select().from(plans);
-  } catch (error) {
-    // Log the error for debugging
-    console.error("Failed to fetch plans:", error);
+    const result = await db.select().from(plans);
 
-    // Rethrow with a more user-friendly message
-    throw new Error(
-      "Unable to fetch subscription plans. Please try again later."
-    );
+    return {
+      data: result,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Failed to fetch plans",
+    };
   }
 }

@@ -6,6 +6,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 import QueryClientProviders from "@/providers/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import PlansDialog from "@/components/plans-dialog";
+import ClientOnly from "@/components/client-only";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +37,9 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <ClientOnly>
+            <PlansDialog />
+          </ClientOnly>
           <ReactQueryDevtools initialIsOpen={false} />
         </body>
       </QueryClientProviders>

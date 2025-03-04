@@ -27,6 +27,8 @@ import {
   useGetCustomerPortalUrl,
   useSubscriptionSettings,
 } from "@/lemonsqueezy/queries";
+import ClientOnly from "./client-only";
+import PlansDialog from "./plans-dialog";
 
 export default function UserProfile() {
   const { data: user } = useGetUser();
@@ -107,83 +109,17 @@ export default function UserProfile() {
           </div>
 
           {/* Action Button */}
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              size="sm"
-              onClick={() =>
-                getCustomerPortalUrl.mutate({
-                  subscriptionId: userSubscription.data?.subscriptionId || "",
-                })
-              }
-            >
-              Manage Subscription
-            </Button>
-            {status !== "cancelled" ? (
-              status === "active" ? (
-                <Button
-                  className="w-full"
-                  size="sm"
-                  onClick={() =>
-                    subscriptionSettings.mutate({
-                      subscriptionId:
-                        userSubscription.data?.subscriptionId || "",
-                      type: "pause",
-                    })
-                  }
-                  disabled={subscriptionSettings.isPending}
-                >
-                  Pause Subscription
+          {!status ? (
+            <ClientOnly>
+              <PlansDialog overlayClassName="bg-transparent">
+                <Button className="w-full" size="sm">
+                  Upgrade to Pro
                 </Button>
-              ) : (
-                <Button
-                  className="w-full"
-                  size="sm"
-                  onClick={() =>
-                    subscriptionSettings.mutate({
-                      subscriptionId:
-                        userSubscription.data?.subscriptionId || "",
-                      type: "unpause",
-                    })
-                  }
-                  disabled={subscriptionSettings.isPending}
-                >
-                  Unpause Subscription
-                </Button>
-              )
-            ) : null}
-            {status === "cancelled" ? (
-              <Button
-                className="w-full"
-                size="sm"
-                onClick={() =>
-                  subscriptionSettings.mutate({
-                    subscriptionId: userSubscription.data?.subscriptionId || "",
-                    type: "resume",
-                  })
-                }
-                disabled={subscriptionSettings.isPending}
-              >
-                Resume Subscription
-              </Button>
-            ) : (
-              <Button
-                variant="destructive"
-                className="w-full"
-                size="sm"
-                onClick={() =>
-                  subscriptionSettings.mutate({
-                    subscriptionId: userSubscription.data?.subscriptionId || "",
-                    type: "cancel",
-                  })
-                }
-                disabled={subscriptionSettings.isPending}
-              >
-                Cancel Subscription
-              </Button>
-            )}
-          </div>
+              </PlansDialog>
+            </ClientOnly>
+          ) : (
+            <SubscriptionButton />
+          )}
         </div>
         <Separator className="my-4" />
         <div className="flex w-full flex-col gap-2">
@@ -231,5 +167,89 @@ export default function UserProfile() {
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SubscriptionButton() {
+  const userSubscription = useGetUserSubscription();
+  const getCustomerPortalUrl = useGetCustomerPortalUrl();
+  const subscriptionSettings = useSubscriptionSettings();
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Button
+        variant="outline"
+        className="w-full"
+        size="sm"
+        onClick={() =>
+          getCustomerPortalUrl.mutate({
+            subscriptionId: userSubscription.data?.subscriptionId || "",
+          })
+        }
+      >
+        Manage Subscription
+      </Button>
+      {status !== "cancelled" ? (
+        status === "active" ? (
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() =>
+              subscriptionSettings.mutate({
+                subscriptionId: userSubscription.data?.subscriptionId || "",
+                type: "pause",
+              })
+            }
+            disabled={subscriptionSettings.isPending}
+          >
+            Pause Subscription
+          </Button>
+        ) : (
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() =>
+              subscriptionSettings.mutate({
+                subscriptionId: userSubscription.data?.subscriptionId || "",
+                type: "unpause",
+              })
+            }
+            disabled={subscriptionSettings.isPending}
+          >
+            Unpause Subscription
+          </Button>
+        )
+      ) : null}
+      {status === "cancelled" ? (
+        <Button
+          className="w-full"
+          size="sm"
+          onClick={() =>
+            subscriptionSettings.mutate({
+              subscriptionId: userSubscription.data?.subscriptionId || "",
+              type: "resume",
+            })
+          }
+          disabled={subscriptionSettings.isPending}
+        >
+          Resume Subscription
+        </Button>
+      ) : (
+        <Button
+          variant="destructive"
+          className="w-full"
+          size="sm"
+          onClick={() =>
+            subscriptionSettings.mutate({
+              subscriptionId: userSubscription.data?.subscriptionId || "",
+              type: "cancel",
+            })
+          }
+          disabled={subscriptionSettings.isPending}
+        >
+          Cancel Subscription
+        </Button>
+      )}
+    </div>
   );
 }
