@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon, CreditCardIcon } from "lucide-react";
 
 import { useGetUser } from "@/hooks/useGetUser";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Separator } from "./ui/separator";
 import { useDeleteAccount, useLogoutMutation } from "@/hooks/useAuth";
 
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,15 +20,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "./ui/badge";
+
+import {
+  useGetUserSubscription,
+  useGetCustomerPortalUrl,
+  useSubscriptionSettings,
+} from "@/lemonsqueezy/queries";
 
 export default function UserProfile() {
   const { data: user } = useGetUser();
   const { mutate: signOut } = useLogoutMutation();
   const deleteAccount = useDeleteAccount();
 
+  const userSubscription = useGetUserSubscription();
+  const getCustomerPortalUrl = useGetCustomerPortalUrl();
+  const subscriptionSettings = useSubscriptionSettings();
+
   const [open, setOpen] = useState(false);
 
   if (!user) return null;
+
+  const { status, variantName, cardBrand, cardLastFour, renewsAt } =
+    userSubscription.data || {};
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -50,6 +66,124 @@ export default function UserProfile() {
         <div className="overflow-hidden">
           <p className="truncate text-sm font-medium">{user.user.name}</p>
           <p className="truncate text-xs text-gray-500">{user.user.email}</p>
+        </div>
+        <Separator className="my-4" />
+        <div className="w-full space-y-6 rounded-lg border p-4">
+          {/* Subscription Header */}
+          <div className="flex items-center justify-between">
+            <Badge variant="outline" className="text-sm font-medium capitalize">
+              {variantName} Plan
+            </Badge>
+            <Badge
+              variant={status === "active" ? "default" : "secondary"}
+              className="capitalize"
+            >
+              {status}
+            </Badge>
+          </div>
+
+          {/* Payment Details */}
+          <div className="space-y-3">
+            {/* Renewal Date */}
+            <div className="flex items-center gap-2 text-sm">
+              <CalendarIcon className="text-muted-foreground h-4 w-4" />
+              <span className="text-muted-foreground">
+                {renewsAt
+                  ? `Renews ${format(new Date(renewsAt), "MMMM d, yyyy")}`
+                  : "No renewal date"}
+              </span>
+            </div>
+
+            {/* Payment Method */}
+            {(cardLastFour || cardBrand) && (
+              <div className="flex items-center gap-2 text-sm">
+                <CreditCardIcon className="text-muted-foreground h-4 w-4" />
+                <span className="text-muted-foreground">
+                  {cardBrand && <span className="capitalize">{cardBrand}</span>}
+                  {cardLastFour && <span> •••• {cardLastFour}</span>}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              className="w-full"
+              size="sm"
+              onClick={() =>
+                getCustomerPortalUrl.mutate({
+                  subscriptionId: userSubscription.data?.subscriptionId || "",
+                })
+              }
+            >
+              Manage Subscription
+            </Button>
+            {status !== "cancelled" ? (
+              status === "active" ? (
+                <Button
+                  className="w-full"
+                  size="sm"
+                  onClick={() =>
+                    subscriptionSettings.mutate({
+                      subscriptionId:
+                        userSubscription.data?.subscriptionId || "",
+                      type: "pause",
+                    })
+                  }
+                  disabled={subscriptionSettings.isPending}
+                >
+                  Pause Subscription
+                </Button>
+              ) : (
+                <Button
+                  className="w-full"
+                  size="sm"
+                  onClick={() =>
+                    subscriptionSettings.mutate({
+                      subscriptionId:
+                        userSubscription.data?.subscriptionId || "",
+                      type: "unpause",
+                    })
+                  }
+                  disabled={subscriptionSettings.isPending}
+                >
+                  Unpause Subscription
+                </Button>
+              )
+            ) : null}
+            {status === "cancelled" ? (
+              <Button
+                className="w-full"
+                size="sm"
+                onClick={() =>
+                  subscriptionSettings.mutate({
+                    subscriptionId: userSubscription.data?.subscriptionId || "",
+                    type: "resume",
+                  })
+                }
+                disabled={subscriptionSettings.isPending}
+              >
+                Resume Subscription
+              </Button>
+            ) : (
+              <Button
+                variant="destructive"
+                className="w-full"
+                size="sm"
+                onClick={() =>
+                  subscriptionSettings.mutate({
+                    subscriptionId: userSubscription.data?.subscriptionId || "",
+                    type: "cancel",
+                  })
+                }
+                disabled={subscriptionSettings.isPending}
+              >
+                Cancel Subscription
+              </Button>
+            )}
+          </div>
         </div>
         <Separator className="my-4" />
         <div className="flex w-full flex-col gap-2">

@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { lemonSqueezySetup } from "@lemonsqueezy/lemonsqueezy.js";
+import { lemonSqueezySetup, NewCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 
 import { db } from "@/db";
 import { webhookEvents } from "@/db/schema";
@@ -78,9 +78,27 @@ export async function storeWebhookEvent(
 
 // TYPES
 
+export interface LemonSqueezyError {
+  jsonapi: { version: string };
+  errors: {
+    detail: string;
+    source: {
+      pointer: string;
+    };
+    status: string;
+    title: string;
+  }[];
+}
+
 export type LemonSqueezyCustomerMetadata = {
   user_id: string;
 };
+
+export type LemonSqueezySubscriptionTypes =
+  | "pause"
+  | "unpause"
+  | "resume"
+  | "cancel";
 
 export type LemonSqueezyEventName =
   | "order_created"
@@ -211,3 +229,24 @@ export interface LemonSqueezySubscriptionAttributes {
   };
   meta: MetaBody;
 }
+
+export type LemonSqueezyCheckoutBody = {
+  data: {
+    type: "checkouts";
+    attributes: NewCheckout;
+    relationships: {
+      store: {
+        data: {
+          type: "stores";
+          id: string;
+        };
+      };
+      variant: {
+        data: {
+          id: string;
+          type: "variants";
+        };
+      };
+    };
+  };
+};
