@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { useGetUser } from "@/hooks/useGetUser";
 import { createCheckout } from "@/lemonsqueezy/action";
-import { useGetPlans } from "@/lemonsqueezy/queries";
+import { useCreateSubscription, useGetPlans } from "@/lemonsqueezy/queries";
 import { Button } from "./ui/button";
 import AuthDialog from "./auth-dialog";
 
@@ -39,41 +39,16 @@ function CheckoutButton({ variantId }: { variantId: number }) {
 
   const { data: user } = useGetUser();
 
-  const createCheckoutMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      const response = await createCheckout({
-        variantId: variantId.toString(),
-        userId: user.user.id,
-        attributes: {
-          productOptions: {
-            redirectUrl: window.location.href,
-          },
-        },
-      });
-
-      if (!response.data) {
-        throw new Error(response.message || "Failed to create checkout");
-      }
-
-      return response.data;
-    },
-    onSuccess: (data) => {
-      window.location.href = data;
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+  const createCheckoutMutation = useCreateSubscription();
 
   return (
     <AuthDialog open={open} onOpenChange={setOpen}>
       <Button
         className="mt-4 w-full"
-        onClick={() => user && createCheckoutMutation.mutate()}
+        onClick={() =>
+          user &&
+          createCheckoutMutation.mutate({ variantId: variantId.toString() })
+        }
         disabled={createCheckoutMutation.isPending}
       >
         Subscribe

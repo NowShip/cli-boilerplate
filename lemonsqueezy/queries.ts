@@ -6,6 +6,7 @@ import {
   getUserSubscription,
   getCustomerPortalUrl,
   subscriptionSettings,
+  createCheckout,
 } from "./action";
 import { useGetUser } from "@/hooks/useGetUser";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ export const useGetPlans = () => {
         throw new Error(response.message);
       }
 
-      return response.data;
+      return response.data?.sort((a, b) => a.price - b.price);
     },
     retry: false,
   });
@@ -98,6 +99,40 @@ export const useSubscriptionSettings = () => {
     onSuccess: (data) => {
       toast.success(data);
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useCreateSubscription = () => {
+  const { data: user } = useGetUser();
+
+  return useMutation({
+    mutationFn: async ({ variantId }: { variantId: string }) => {
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const response = await createCheckout({
+        variantId: variantId.toString(),
+        userId: user.user.id,
+        attributes: {
+          productOptions: {
+            redirectUrl: window.location.href,
+          },
+        },
+      });
+
+      if (!response.data) {
+        throw new Error(response.message || "Failed to create checkout");
+      }
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      window.location.href = data;
     },
     onError: (error) => {
       toast.error(error.message);

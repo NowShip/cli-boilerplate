@@ -141,5 +141,6 @@ export type Account = typeof account.$inferInsert;
 export type Verification = typeof verification.$inferInsert;
 export type WebhookEvent = typeof webhookEvents.$inferInsert;
 export type Plan = typeof plans.$inferInsert;
+export type PlanSelect = typeof plans.$inferSelect;
 export type Subscription = typeof subscriptions.$inferInsert;
 export type Order = typeof orders.$inferInsert;

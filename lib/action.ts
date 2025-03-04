@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { Plan, plans, tasksTable } from "@/db/schema";
+import { Plan, plans, PlanSelect, tasksTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function createTask(title: string) {
@@ -20,7 +20,7 @@ export async function updateTask(id: number, title: string) {
   await db.update(tasksTable).set({ title }).where(eq(tasksTable.id, id));
 }
 
-export async function getPlans(): Promise<ServerResponse<Plan[]>> {
+export async function getPlans(): Promise<ServerResponse<PlanSelect[]>> {
   try {
     const result = await db.select().from(plans);
 

@@ -23,3 +23,9 @@ export function convertKeysToSnakeCase(
     ])
   );
 }
+
+export function formatPrice(price?: number) {
+  if (!price) return "";
+
+  return `$${(price / 100).toFixed(2)}`;
+}

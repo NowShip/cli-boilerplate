@@ -36,8 +36,6 @@ export default function UserProfile() {
   const deleteAccount = useDeleteAccount();
 
   const userSubscription = useGetUserSubscription();
-  const getCustomerPortalUrl = useGetCustomerPortalUrl();
-  const subscriptionSettings = useSubscriptionSettings();
 
   const [open, setOpen] = useState(false);
 
@@ -72,41 +70,50 @@ export default function UserProfile() {
         <Separator className="my-4" />
         <div className="w-full space-y-6 rounded-lg border p-4">
           {/* Subscription Header */}
-          <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-sm font-medium capitalize">
-              {variantName} Plan
-            </Badge>
-            <Badge
-              variant={status === "active" ? "default" : "secondary"}
-              className="capitalize"
-            >
-              {status}
-            </Badge>
-          </div>
+          {status ? (
+            <div className="flex items-center justify-between">
+              <Badge
+                variant="outline"
+                className="text-sm font-medium capitalize"
+              >
+                {variantName} Plan
+              </Badge>
+              <Badge
+                variant={status === "active" ? "default" : "secondary"}
+                className="capitalize"
+              >
+                {status}
+              </Badge>
+            </div>
+          ) : null}
 
           {/* Payment Details */}
-          <div className="space-y-3">
-            {/* Renewal Date */}
-            <div className="flex items-center gap-2 text-sm">
-              <CalendarIcon className="text-muted-foreground h-4 w-4" />
-              <span className="text-muted-foreground">
-                {renewsAt
-                  ? `Renews ${format(new Date(renewsAt), "MMMM d, yyyy")}`
-                  : "No renewal date"}
-              </span>
-            </div>
-
-            {/* Payment Method */}
-            {(cardLastFour || cardBrand) && (
+          {status ? (
+            <div className="space-y-3">
+              {/* Renewal Date */}
               <div className="flex items-center gap-2 text-sm">
-                <CreditCardIcon className="text-muted-foreground h-4 w-4" />
+                <CalendarIcon className="text-muted-foreground h-4 w-4" />
                 <span className="text-muted-foreground">
-                  {cardBrand && <span className="capitalize">{cardBrand}</span>}
-                  {cardLastFour && <span> •••• {cardLastFour}</span>}
+                  {renewsAt
+                    ? `Renews ${format(new Date(renewsAt), "MMMM d, yyyy")}`
+                    : "No renewal date"}
                 </span>
               </div>
-            )}
-          </div>
+
+              {/* Payment Method */}
+              {(cardLastFour || cardBrand) && (
+                <div className="flex items-center gap-2 text-sm">
+                  <CreditCardIcon className="text-muted-foreground h-4 w-4" />
+                  <span className="text-muted-foreground">
+                    {cardBrand && (
+                      <span className="capitalize">{cardBrand}</span>
+                    )}
+                    {cardLastFour && <span> •••• {cardLastFour}</span>}
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {/* Action Button */}
           {!status ? (
