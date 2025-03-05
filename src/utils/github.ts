@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 
 function getGithubToken(): string {
-  return "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";
+  return process.env.GITHUB_TOKEN || "";
 }
 
 function createOctokit() {

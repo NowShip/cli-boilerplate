@@ -12,7 +12,7 @@ import { Base64 } from "js-base64";
 import fs from "fs";
 import path from "path";
 function getGithubToken() {
-    return "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";
+    return process.env.GITHUB_TOKEN || "";
 }
 function createOctokit() {
     const token = getGithubToken(); // This will throw if no token is found
