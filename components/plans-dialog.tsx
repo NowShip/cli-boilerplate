@@ -54,13 +54,13 @@ export default function PlansDialog({
 
   const isChangePlan = userSubscription.data?.status === "active";
 
-  useEffect(() => {
-    if (userSubscription.data?.variantId) {
-      setSelectedPlan(userSubscription.data?.variantId.toString());
-    } else if (plans.data && !selectedPlan) {
-      setSelectedPlan(plans.data?.[1].variantId.toString());
-    }
-  }, [plans.data]);
+  // useEffect(() => {
+  //   if (userSubscription.data?.variantId) {
+  //     setSelectedPlan(userSubscription.data?.variantId.toString());
+  //   } else if (plans.data && !selectedPlan) {
+  //     setSelectedPlan(plans.data?.[1].variantId.toString() || null);
+  //   }
+  // }, [plans.data]);
 
   return (
     <AlertDialog
@@ -191,8 +191,8 @@ export default function PlansDialog({
             <ul className="text-muted-foreground space-y-2 text-sm">
               <li>
                 <span className="font-medium">Upgrading:</span> Immediate
-                access. You'll only be charged the pro-rated difference for the
-                remaining period.
+                access. You&apos;ll only be charged the pro-rated difference for
+                the remaining period.
               </li>
               <li>
                 <span className="font-medium">Downgrading:</span> Continues

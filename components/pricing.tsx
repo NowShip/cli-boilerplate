@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useCreateSubscription, useGetPlans } from "@/lemonsqueezy/queries";
 
 import { useGetUser } from "@/hooks/useGetUser";
-import { createCheckout } from "@/lemonsqueezy/action";
-import { useCreateSubscription, useGetPlans } from "@/lemonsqueezy/queries";
 import { Button } from "./ui/button";
 import AuthDialog from "./auth-dialog";
+import { formatPrice } from "@/lib/utils";
 
 export default function Pricing() {
   const plans = useGetPlans();
@@ -19,14 +17,14 @@ export default function Pricing() {
         ?.sort((a, b) => a.price - b.price)
         ?.filter((plan) => plan.name.toLowerCase() !== "products")
         .map((plan) => (
-          <div key={plan.id} className="rounded-2xl border p-4">
+          <div key={plan.id} className="w-full rounded-2xl border p-4">
             <h2>{plan.name}</h2>
             <p
               dangerouslySetInnerHTML={{
                 __html: plan.description || "",
               }}
             />
-            <p>{plan.price}</p>
+            <p>{formatPrice(plan.price)}</p>
             <CheckoutButton variantId={plan.variantId} />
           </div>
         ))}

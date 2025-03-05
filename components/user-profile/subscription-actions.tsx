@@ -114,9 +114,9 @@ export function SubscriptionActions({
                 <DialogDescription asChild>
                   <div className="space-y-4">
                     <p>
-                      We value your membership and want to make sure you don't
-                      miss out on upcoming features. Would you like to pause
-                      your subscription instead?
+                      We value your membership and want to make sure you
+                      don&apos;t miss out on upcoming features. Would you like
+                      to pause your subscription instead?
                     </p>
 
                     <div className="bg-muted/50 rounded-lg border p-3 text-sm">
@@ -182,7 +182,7 @@ export function SubscriptionActions({
                               {format(new Date(renewAt), "MMMM d, yyyy")}
                             </li>
                             <li>
-                              After that date, you'll need to create a new
+                              After that date, you&apos;ll need to create a new
                               subscription to regain access
                             </li>
                           </ul>
