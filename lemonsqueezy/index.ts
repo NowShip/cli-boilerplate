@@ -101,6 +101,15 @@ export type LemonSqueezySubscriptionTypes =
   | "cancel"
   | "change_plan";
 
+export type SubscriptionStatus =
+  | "on_trial"
+  | "active"
+  | "paused"
+  | "past_due"
+  | "unpaid"
+  | "cancelled"
+  | "expired";
+
 export type LemonSqueezyEventName =
   | "order_created"
   | "subscription_created"

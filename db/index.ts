@@ -28,6 +28,14 @@ async function storePlans() {
     for (const v of allVariants) {
       const variant = v.attributes;
 
+      const findProduct = products.data?.data.find(
+        (product) => product.id === variant.product_id.toString()
+      );
+
+      if (findProduct?.attributes.status !== "published") {
+        continue;
+      }
+
       // Skip draft variants or if there's more than one variant, skip the default
       // variant. See https://docs.lemonsqueezy.com/api/variants
       if (

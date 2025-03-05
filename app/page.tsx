@@ -44,16 +44,7 @@ export default function Home() {
         <div
           className={cn(
             "flex h-24 items-center justify-center rounded-2xl border",
-            userSubscription.data?.variantName === "Free" &&
-              "border-transparent bg-green-500"
-          )}
-        >
-          Free
-        </div>
-        <div
-          className={cn(
-            "flex h-24 items-center justify-center rounded-2xl border",
-            userSubscription.data?.variantName === "Pro" &&
+            userSubscription.data?.currentPlan === "pro" &&
               "border-transparent bg-green-500"
           )}
         >
@@ -62,7 +53,7 @@ export default function Home() {
         <div
           className={cn(
             "flex h-24 items-center justify-center rounded-2xl border",
-            userSubscription.data?.variantName === "Business" &&
+            userSubscription.data?.currentPlan === "business" &&
               "border-transparent bg-green-500"
           )}
         >

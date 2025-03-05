@@ -46,7 +46,13 @@ export const useGetUserSubscription = () => {
       }
 
       // Ensure we return null instead of undefined if data is missing
-      return response.data || null;
+      return {
+        ...response.data,
+        currentPlan:
+          response.data?.status !== "expired"
+            ? response.data?.variantName.toLowerCase()
+            : undefined,
+      };
     },
     enabled: !!user?.user.id,
     staleTime: 6000 * 60 * 1, // 1 hours

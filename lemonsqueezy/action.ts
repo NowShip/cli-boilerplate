@@ -4,7 +4,7 @@ import axios, { AxiosError } from "axios";
 import { getPrice, NewCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 
 import { db } from "@/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import {
   Order,
@@ -327,6 +327,7 @@ export async function getUserSubscription(
       .select()
       .from(subscriptions)
       .where(eq(subscriptions.userId, userId))
+      .orderBy(desc(subscriptions.id))
       .limit(1)
       .then((rows) => rows[0]);
 

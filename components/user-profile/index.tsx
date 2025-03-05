@@ -1,6 +1,11 @@
 "use client";
 
-import { CalendarIcon, CreditCardIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  CreditCardIcon,
+  AlertCircleIcon,
+  CircleAlertIcon,
+} from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -37,9 +42,8 @@ interface UserProfileProps {
 export default function UserProfile({ children }: UserProfileProps) {
   const { data: user } = useGetUser();
   const userSubscription = useGetUserSubscription();
-  const deleteAccount = useDeleteAccount();
 
-  const { status, variantName, cardBrand, cardLastFour, renewsAt } =
+  const { status, variantName, cardBrand, cardLastFour, renewsAt, endsAt } =
     userSubscription.data || {};
 
   return (
@@ -86,7 +90,22 @@ export default function UserProfile({ children }: UserProfileProps) {
         <Separator />
         <div className="w-full space-y-6 p-4">
           {/* Subscription Header */}
-          {status ? (
+          {status === "expired" ? (
+            <div className="rounded-md border border-red-500/50 px-4 py-3 text-red-600">
+              <div className="flex gap-3">
+                <CircleAlertIcon
+                  className="mt-0.5 shrink-0 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
+                <p className="text-sm font-medium">
+                  Your subscription ended on{" "}
+                  {endsAt ? format(new Date(endsAt), "MMMM d, yyyy") : ""}.
+                  Renew now to regain access to all premium features.
+                </p>
+              </div>
+            </div>
+          ) : status ? (
             <div className="flex items-center justify-between">
               <Badge
                 variant="outline"
@@ -104,7 +123,7 @@ export default function UserProfile({ children }: UserProfileProps) {
           ) : null}
 
           {/* Payment Details */}
-          {status ? (
+          {status && status !== "expired" ? (
             <div className="space-y-3">
               {/* Renewal Date */}
               <div className="flex items-center gap-2 text-sm">
@@ -132,7 +151,7 @@ export default function UserProfile({ children }: UserProfileProps) {
           ) : null}
 
           {/* Action Button */}
-          {!status ? (
+          {!status || status === "expired" ? (
             <ClientOnly>
               <PlansDialog overlayClassName="bg-transparent">
                 <Button className="w-full">Upgrade to Pro</Button>
@@ -152,7 +171,6 @@ export default function UserProfile({ children }: UserProfileProps) {
 
 function SubscriptionButton() {
   const userSubscription = useGetUserSubscription();
-  const getCustomerPortalUrl = useGetCustomerPortalUrl();
   const subscriptionSettings = useSubscriptionSettings();
 
   const { status } = userSubscription.data || {};
