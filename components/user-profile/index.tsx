@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CalendarIcon,
-  CreditCardIcon,
-  CircleAlertIcon,
-  LogOutIcon,
-} from "lucide-react";
-import { format } from "date-fns";
+import { LogOutIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,15 +18,15 @@ import { useGetUser } from "@/hooks/useGetUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
-  useGetUserSubscription,
-  useSubscriptionSettings,
+  useCreateOrder,
+  useGetPlans,
+  useGetUserOrder,
 } from "@/lemonsqueezy/queries";
 import { useLogoutMutation } from "@/hooks/useAuth";
-import ClientOnly from "@/components/client-only";
-import PlansDialog from "@/components/plans-dialog";
-import { Badge } from "@/components/ui/badge";
 import DeleteUser from "./delete-user";
-import { SubscriptionActions } from "./subscription-actions";
+import Refunded from "./refunded";
+import Paid from "./paid";
+import GetFullAccess from "./get-full-access";
 
 interface UserProfileProps {
   children?: React.ReactNode;
@@ -40,11 +34,12 @@ interface UserProfileProps {
 
 export default function UserProfile({ children }: UserProfileProps) {
   const { data: user } = useGetUser();
-  const userSubscription = useGetUserSubscription();
+  const userOrder = useGetUserOrder();
   const { mutate: signOut } = useLogoutMutation();
+  const createOrder = useCreateOrder();
+  const plans = useGetPlans();
 
-  const { status, variantName, cardBrand, cardLastFour, renewsAt, endsAt } =
-    userSubscription.data || {};
+  const { status } = userOrder.data || {};
 
   return (
     <Dialog>
@@ -88,77 +83,15 @@ export default function UserProfile({ children }: UserProfileProps) {
           </div>
         </div>
         <Separator />
-        <div className="w-full space-y-6 p-4">
-          {/* Subscription Header */}
-          {status === "expired" ? (
-            <div className="rounded-md border border-red-500/50 px-4 py-3 text-red-600">
-              <div className="flex gap-3">
-                <CircleAlertIcon
-                  className="mt-0.5 shrink-0 opacity-60"
-                  size={16}
-                  aria-hidden="true"
-                />
-                <p className="text-sm font-medium">
-                  Your subscription ended on{" "}
-                  {endsAt ? format(new Date(endsAt), "MMMM d, yyyy") : ""}.
-                  Renew now to regain access to all premium features.
-                </p>
-              </div>
-            </div>
-          ) : status ? (
-            <div className="flex items-center justify-between">
-              <Badge
-                variant="outline"
-                className="text-sm font-medium capitalize"
-              >
-                {variantName} Plan
-              </Badge>
-              <Badge
-                variant={status === "active" ? "default" : "secondary"}
-                className="capitalize"
-              >
-                {status}
-              </Badge>
-            </div>
-          ) : null}
 
-          {/* Payment Details */}
-          {status && status !== "expired" ? (
-            <div className="space-y-3">
-              {/* Renewal Date */}
-              <div className="flex items-center gap-2 text-sm">
-                <CalendarIcon className="text-muted-foreground h-4 w-4" />
-                <span className="text-muted-foreground">
-                  {renewsAt
-                    ? `Renews ${format(new Date(renewsAt), "MMMM d, yyyy")}`
-                    : "No renewal date"}
-                </span>
-              </div>
-
-              {/* Payment Method */}
-              {(cardLastFour || cardBrand) && (
-                <div className="flex items-center gap-2 text-sm">
-                  <CreditCardIcon className="text-muted-foreground h-4 w-4" />
-                  <span className="text-muted-foreground">
-                    {cardBrand && (
-                      <span className="capitalize">{cardBrand}</span>
-                    )}
-                    {cardLastFour && <span> •••• {cardLastFour}</span>}
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : null}
-
-          {/* Action Button */}
-          {!status || status === "expired" ? (
-            <ClientOnly>
-              <PlansDialog overlayClassName="bg-transparent">
-                <Button className="w-full">Upgrade to Pro</Button>
-              </PlansDialog>
-            </ClientOnly>
+        {/* Action Button */}
+        <div className="px-6 py-4">
+          {status === "paid" ? (
+            <Paid />
+          ) : status === "refunded" ? (
+            <Refunded />
           ) : (
-            <SubscriptionButton />
+            <GetFullAccess />
           )}
         </div>
         <DialogFooter className="border-t px-6 py-4">
@@ -169,64 +102,5 @@ export default function UserProfile({ children }: UserProfileProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function SubscriptionButton() {
-  const userSubscription = useGetUserSubscription();
-  const subscriptionSettings = useSubscriptionSettings();
-
-  const { status } = userSubscription.data || {};
-
-  if (status === "paused") {
-    return (
-      <Button
-        variant="outline"
-        className="w-full"
-        size="sm"
-        onClick={() =>
-          subscriptionSettings.mutate({
-            subscriptionId: userSubscription.data?.subscriptionId || "",
-            type: "unpause",
-          })
-        }
-        disabled={subscriptionSettings.isPending}
-      >
-        Unpause Subscription
-      </Button>
-    );
-  }
-
-  if (status === "cancelled") {
-    return (
-      <Button
-        variant="outline"
-        className="w-full"
-        size="sm"
-        onClick={() =>
-          subscriptionSettings.mutate({
-            subscriptionId: userSubscription.data?.subscriptionId || "",
-            type: "resume",
-          })
-        }
-        disabled={subscriptionSettings.isPending}
-      >
-        Resume Subscription
-      </Button>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-1">
-      <PlansDialog overlayClassName="bg-transparent">
-        <Button variant="outline" className="w-full" size="sm">
-          Change Plan
-        </Button>
-      </PlansDialog>
-      <SubscriptionActions
-        subscriptionId={userSubscription.data?.subscriptionId || ""}
-        renewAt={userSubscription.data?.renewsAt || ""}
-      />
-    </div>
   );
 }

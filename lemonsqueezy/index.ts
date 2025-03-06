@@ -101,14 +101,13 @@ export type LemonSqueezySubscriptionTypes =
   | "cancel"
   | "change_plan";
 
-export type SubscriptionStatus =
-  | "on_trial"
-  | "active"
-  | "paused"
-  | "past_due"
-  | "unpaid"
-  | "cancelled"
-  | "expired";
+export type OrderStatus =
+  | "pending"
+  | "failed"
+  | "paid"
+  | "refunded"
+  | "partial_refund"
+  | "fraudulent";
 
 export type LemonSqueezyEventName =
   | "order_created"
@@ -137,7 +136,7 @@ export interface LemonSqueezyOrderAttributes {
         receipt: string;
       };
       total: number;
-      status: string;
+      status: OrderStatus;
       tax_usd: number;
       currency: string;
       refunded: boolean;

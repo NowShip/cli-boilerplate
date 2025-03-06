@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCreateSubscription, useGetPlans } from "@/lemonsqueezy/queries";
+import { useCreateOrder, useGetPlans } from "@/lemonsqueezy/queries";
 
 import { useGetUser } from "@/hooks/useGetUser";
 import { Button } from "./ui/button";
@@ -37,7 +37,7 @@ function CheckoutButton({ variantId }: { variantId: number }) {
 
   const { data: user } = useGetUser();
 
-  const createCheckoutMutation = useCreateSubscription();
+  const createCheckoutMutation = useCreateOrder();
 
   return (
     <AuthDialog open={open} onOpenChange={setOpen}>
@@ -49,7 +49,7 @@ function CheckoutButton({ variantId }: { variantId: number }) {
         }
         disabled={createCheckoutMutation.isPending}
       >
-        Subscribe
+        Get full access
       </Button>
     </AuthDialog>
   );

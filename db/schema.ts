@@ -126,7 +126,16 @@ export const orders = pgTable("order", {
   updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
-  status: text("status").notNull(),
+  status: text("status", {
+    enum: [
+      "pending",
+      "failed",
+      "paid",
+      "refunded",
+      "partial_refund",
+      "fraudulent",
+    ],
+  }).notNull(),
   variantId: integer("variantId")
     .notNull()
     .references(() => plans.variantId),

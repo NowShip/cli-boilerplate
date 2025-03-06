@@ -1,7 +1,7 @@
 "use server";
 
 import axios, { AxiosError } from "axios";
-import { getPrice, NewCheckout } from "@lemonsqueezy/lemonsqueezy.js";
+import { NewCheckout } from "@lemonsqueezy/lemonsqueezy.js";
 
 import { db } from "@/db";
 import { desc, eq } from "drizzle-orm";
@@ -10,8 +10,6 @@ import {
   Order,
   orders,
   plans,
-  Subscription,
-  subscriptions,
   webhookEvents,
   type WebhookEvent,
 } from "@/db/schema";
@@ -23,7 +21,6 @@ import {
   type LemonSqueezyError,
   type LemonSqueezyOrderAttributes,
   type LemonSqueezySubscriptionAttributes,
-  type LemonSqueezySubscriptionTypes,
 } from ".";
 import { convertKeysToSnakeCase } from "@/lib/utils";
 
@@ -57,62 +54,7 @@ export async function processWebhookEvent(webhookEvent: WebhookEvent) {
     webhookEvent.eventName.startsWith("subscription_") &&
     webhookHasData<LemonSqueezySubscriptionAttributes>(eventBody)
   ) {
-    // Save subscription events; obj is a Subscription
-    const attributes = eventBody.data.attributes;
-    const variantId = attributes.variant_id;
-    const meta = eventBody.meta;
-
-    // We assume that the Plan table is up to date.
-    const [plan] = await db
-      .select()
-      .from(plans)
-      .where(eq(plans.variantId, parseInt(variantId.toString(), 10)));
-
-    if (!plan) {
-      processingError = `Plan #${variantId} not found in the database.`;
-    } else {
-      const priceId = attributes.first_subscription_item.price_id;
-
-      const priceData = await getPrice(priceId);
-      if (priceData.error) {
-        processingError = `Failed to get the price data for the subscription ${eventBody.data.id}.`;
-      }
-
-      const isUsageBased = attributes.first_subscription_item.is_usage_based;
-      const price = isUsageBased
-        ? priceData.data?.data.attributes.unit_price_decimal
-        : priceData.data?.data.attributes.unit_price;
-
-      const updateData: Subscription = {
-        subscriptionId: eventBody.data.id,
-        orderId: attributes.order_id,
-        name: attributes.user_name,
-        email: attributes.user_email,
-        status: attributes.status,
-        statusFormatted: attributes.status_formatted,
-        renewsAt: attributes.renews_at,
-        endsAt: attributes.ends_at,
-        trialEndsAt: attributes.trial_ends_at,
-        price: price?.toString() ?? "",
-        isPaused: false,
-        subscriptionItemId: attributes.first_subscription_item.id,
-        isUsageBased: attributes.first_subscription_item.is_usage_based,
-        variantId: plan.variantId,
-        variantName: plan.name,
-        cardLastFour: attributes.card_last_four,
-        cardBrand: attributes.card_brand,
-        userId: meta.custom_data.user_id,
-      };
-
-      try {
-        await db.insert(subscriptions).values(updateData).onConflictDoUpdate({
-          target: subscriptions.subscriptionId,
-          set: updateData,
-        });
-      } catch (error) {
-        processingError = `Failed to upsert Subscription #${updateData.subscriptionId} to the database. ${error}`;
-      }
-    }
+    //  No need to process subscription events.
   } else if (
     webhookEvent.eventName.startsWith("order_") &&
     webhookHasData<LemonSqueezyOrderAttributes>(eventBody)
@@ -240,99 +182,20 @@ export async function createCheckout({
   }
 }
 
-export async function subscriptionSettings({
-  subscriptionId,
-  type,
-  variantId,
-}: {
-  subscriptionId: string;
-  type: LemonSqueezySubscriptionTypes;
-  variantId?: string;
-}): Promise<ServerResponse<string>> {
-  try {
-    if (!subscriptionId) {
-      return {
-        message: "Subscription ID is required",
-      };
-    }
-
-    let attributes = {};
-
-    if (type === "resume") {
-      attributes = {
-        cancelled: false,
-      };
-    }
-
-    if (type === "pause") {
-      attributes = {
-        pause: {
-          mode: "free",
-          resumes_at: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
-        },
-      };
-    }
-
-    if (type === "unpause") {
-      attributes = {
-        pause: false,
-      };
-    }
-
-    if (type === "cancel") {
-      await paymentApi.delete(`/subscriptions/${subscriptionId}`);
-
-      return {
-        data: "Subscription cancelled",
-      };
-    }
-
-    if (type === "change_plan") {
-      if (!variantId) {
-        return {
-          message: "Variant ID is required",
-        };
-      }
-
-      attributes = {
-        variant_id: variantId,
-      };
-    }
-
-    await paymentApi.patch(`/subscriptions/${subscriptionId}`, {
-      data: {
-        type: "subscriptions",
-        id: subscriptionId,
-        attributes,
-      },
-    });
-
-    return {
-      data: "Subscription updated",
-    };
-  } catch (error) {
-    const err = error as AxiosError<LemonSqueezyError>;
-
-    return {
-      message: err.response?.data.errors[0].detail || "Error",
-    };
-  }
-}
-
-export async function getUserSubscription(
+export async function getUserOrder(
   userId: string
-): Promise<ServerResponse<Subscription>> {
+): Promise<ServerResponse<Order>> {
   try {
-    const subscription = await db
+    const order = await db
       .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, userId))
-      .orderBy(desc(subscriptions.id))
+      .from(orders)
+      .where(eq(orders.userId, userId))
+      .orderBy(desc(orders.id))
       .limit(1)
       .then((rows) => rows[0]);
 
     return {
-      data: subscription,
+      data: order,
     };
   } catch (error) {
     const err = error as Error;
