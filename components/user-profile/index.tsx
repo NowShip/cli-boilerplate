@@ -3,8 +3,8 @@
 import {
   CalendarIcon,
   CreditCardIcon,
-  AlertCircleIcon,
   CircleAlertIcon,
+  LogOutIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -24,11 +24,10 @@ import { useGetUser } from "@/hooks/useGetUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
-  useGetCustomerPortalUrl,
   useGetUserSubscription,
   useSubscriptionSettings,
 } from "@/lemonsqueezy/queries";
-import { useDeleteAccount } from "@/hooks/useAuth";
+import { useLogoutMutation } from "@/hooks/useAuth";
 import ClientOnly from "@/components/client-only";
 import PlansDialog from "@/components/plans-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +41,7 @@ interface UserProfileProps {
 export default function UserProfile({ children }: UserProfileProps) {
   const { data: user } = useGetUser();
   const userSubscription = useGetUserSubscription();
+  const { mutate: signOut } = useLogoutMutation();
 
   const { status, variantName, cardBrand, cardLastFour, renewsAt, endsAt } =
     userSubscription.data || {};
@@ -162,6 +162,9 @@ export default function UserProfile({ children }: UserProfileProps) {
           )}
         </div>
         <DialogFooter className="border-t px-6 py-4">
+          <Button variant="outline" size="icon" onClick={() => signOut()}>
+            <LogOutIcon className="h-4 w-4" />
+          </Button>
           <DeleteUser />
         </DialogFooter>
       </DialogContent>
