@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:email": "email dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -24,6 +25,7 @@
     "@radix-ui/react-radio-group": "^1.2.3",
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
+    "@react-email/components": "^0.0.33",
     "@tanstack/react-query": "^5.66.11",
     "@tanstack/react-query-devtools": "^5.66.11",
     "@uidotdev/usehooks": "^2.4.1",
@@ -40,6 +42,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "resend": "^4.1.2",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
@@ -56,6 +59,7 @@
     "eslint-config-next": "15.2.0",
     "prettier": "^3.5.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "react-email": "^3.0.7",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"

@@ -127,6 +127,20 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
+
+          <div className="flex justify-between">
+            <div></div>
+            <Link
+              href="/reset-password"
+              className={buttonVariants({
+                variant: "link",
+                className: "!h-auto !px-0 !py-0",
+              })}
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           <Button type="submit" disabled={form.formState.isSubmitting}>
             Login
           </Button>
