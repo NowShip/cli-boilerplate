@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCreateSubscription, useGetPlans } from "@/lemonsqueezy/queries";
+import {
+  useCreateSubscription,
+  useGetPlans,
+  useGetUserSubscription,
+} from "@/lemonsqueezy/queries";
 
 import { useGetUser } from "@/hooks/useGetUser";
 import { Button } from "./ui/button";
@@ -10,6 +14,9 @@ import { formatPrice } from "@/lib/utils";
 
 export default function Pricing() {
   const plans = useGetPlans();
+  const userSubscription = useGetUserSubscription();
+
+  if (userSubscription.data?.currentPlan) return null;
 
   return (
     <div className="mt-8 flex flex-wrap gap-4">

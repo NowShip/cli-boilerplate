@@ -43,7 +43,7 @@ export default function Home() {
           <Button onClick={() => signOut()}>Logout</Button>
         )}
       </div>
-      <h1 className="mb-4 text-2xl font-bold">Tasks - Testing the branch</h1>
+      <h1 className="mb-4 text-2xl font-bold">Tasks</h1>
       <div className="grid grid-cols-3 gap-4">
         <div
           className={cn(
