@@ -22,12 +22,16 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-sm py-12">
       <div className="mb-8 flex items-center gap-4">
-        <UserProfile>
-          <Avatar>
-            <AvatarImage src={user?.user.image || ""} />
-            <AvatarFallback>{user?.user.name?.charAt(0) || "U"}</AvatarFallback>
-          </Avatar>
-        </UserProfile>
+        {user && (
+          <UserProfile>
+            <Avatar>
+              <AvatarImage src={user?.user.image || ""} />
+              <AvatarFallback>
+                {user?.user.name?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </UserProfile>
+        )}
         {isUserPending ? (
           "Loading..."
         ) : !user ? (
