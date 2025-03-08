@@ -16,6 +16,7 @@ import boxen from "boxen";
 import { AllAnswers } from "./types/index.js";
 import { welcomeMessage } from "./utils/messages.js";
 import { fetchBranches, generateFiles } from "./utils/github.js";
+import { exec } from "child_process";
 
 welcomeMessage();
 
@@ -96,6 +97,11 @@ getProjectConfig()
     try {
       spinner.text = chalk.cyan("📦 Fetching template files...");
       await generateFiles(answers.projectName, answers.branch);
+
+      // Add git init
+      exec(`git init ${answers.projectName}`);
+      exec(`git add .`);
+      exec(`git commit -m "Ready to ship!"`);
 
       spinner.succeed();
 

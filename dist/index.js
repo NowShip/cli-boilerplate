@@ -20,6 +20,7 @@ import ora from "ora";
 import boxen from "boxen";
 import { welcomeMessage } from "./utils/messages.js";
 import { fetchBranches, generateFiles } from "./utils/github.js";
+import { exec } from "child_process";
 welcomeMessage();
 function getProjectConfig() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -88,6 +89,10 @@ getProjectConfig()
     try {
         spinner.text = chalk.cyan("📦 Fetching template files...");
         yield generateFiles(answers.projectName, answers.branch);
+        // Add git init
+        exec(`git init ${answers.projectName}`);
+        exec(`git add .`);
+        exec(`git commit -m "Ready to ship!"`);
         spinner.succeed();
         // Project Created header with consistent spacing
         console.log(boxen(chalk.green.bold("Project Created! 🎉"), {

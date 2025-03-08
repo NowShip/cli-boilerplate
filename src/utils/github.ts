@@ -88,8 +88,32 @@ export async function generateFiles(projectName: string, branch: string) {
     // Fetch template files from GitHub
     const templateFiles = await fetchTemplateFromGithub(branch);
 
+    const excludeFiles = [
+      // Lock files and package manager files
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "yarn.lock",
+      "bun.lockb",
+      ".pnp.js",
+      ".pnp.cjs",
+      // Directories to exclude
+      "node_modules/",
+      ".yarn/",
+      // Config files that might contain lock information
+      ".npmrc",
+      ".yarnrc",
+      ".pnpmrc",
+    ];
+
     // Generate files in the project directory
     for (const [filePath, content] of Object.entries(templateFiles)) {
+      // Skip excluded files
+      if (
+        excludeFiles.some((excludedFile) => filePath.includes(excludedFile))
+      ) {
+        continue;
+      }
+
       const fullPath = path.join(process.cwd(), projectName, filePath);
       await fs.promises.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.promises.writeFile(
