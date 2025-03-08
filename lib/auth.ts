@@ -10,6 +10,17 @@ import { db } from "../db";
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url, token }) => {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send`, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "reset-password",
+          email: user.email,
+          name: user.name,
+          resetPasswordLink: `${url}?token=${token}`,
+        }),
+      });
+    },
   },
   account: {
     accountLinking: {
