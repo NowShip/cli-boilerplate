@@ -11,7 +11,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url, token }) => {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send`, {
+      await fetch(`${process.env.BETTER_AUTH_URL}/api/send`, {
         method: "POST",
         body: JSON.stringify({
           type: "reset-password",
