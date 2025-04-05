@@ -8,7 +8,7 @@ import {
   Variant,
 } from "@lemonsqueezy/lemonsqueezy.js";
 
-import { configureLemonSqueezy } from "@/lemonsqueezy";
+import { configureLemonSqueezy } from "@/paymant";
 import { plans } from "./schema";
 
 export const db = drizzle(process.env.DATABASE_URL as string);

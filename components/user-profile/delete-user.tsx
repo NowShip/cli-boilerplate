@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useDeleteAccount } from "@/hooks/useAuth";
+import { useDeleteAccount } from "@/auth/useAuth";
 
 const PROJECT_NAME = "DELETE";
 

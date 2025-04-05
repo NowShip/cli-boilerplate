@@ -2,14 +2,12 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -21,9 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth-client";
-import { useGetUser } from "@/hooks/useGetUser";
-import { useSignInWithGoogle } from "@/hooks/useAuth";
+import { useSignInWithGoogle, useSignInWithEmail } from "@/auth/useAuth";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -31,11 +27,10 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { data: user } = useGetUser();
   const signInWithGoogleMutation = useSignInWithGoogle();
+  const signInWithEmailMutation = useSignInWithEmail();
 
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,21 +41,10 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { error } = await signIn.email({
+    signInWithEmailMutation.mutate({
       email: values.email,
       password: values.password,
     });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/");
-    }
-  }
-
-  if (user) {
-    router.push("/");
   }
 
   return (

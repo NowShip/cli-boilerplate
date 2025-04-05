@@ -14,15 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useGetUser } from "@/hooks/useGetUser";
+import { useGetUser, useLogoutMutation } from "@/auth/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   useCreateOrder,
   useGetPlans,
   useGetUserOrder,
-} from "@/lemonsqueezy/queries";
-import { useLogoutMutation } from "@/hooks/useAuth";
+} from "@/paymant/usePayments";
 import DeleteUser from "./delete-user";
 import Refunded from "./refunded";
 import Paid from "./paid";
@@ -54,8 +53,8 @@ export default function UserProfile({ children }: UserProfileProps) {
         <div className="mt-4 px-6">
           <div className="border-background bg-muted relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 shadow-xs shadow-black/10">
             <Avatar>
-              <AvatarImage src={user?.user?.image || ""} />
-              <AvatarFallback>{user?.user?.name?.charAt(0)}</AvatarFallback>
+              <AvatarImage src={user?.image || ""} />
+              <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
           </div>
         </div>
@@ -66,7 +65,7 @@ export default function UserProfile({ children }: UserProfileProps) {
             <Input
               id={`name`}
               placeholder="Matt"
-              defaultValue={user?.user?.name}
+              defaultValue={user?.name || ""}
               type="text"
               readOnly
             />
@@ -76,7 +75,7 @@ export default function UserProfile({ children }: UserProfileProps) {
             <Input
               id={`email`}
               placeholder="matt@example.com"
-              defaultValue={user?.user?.email}
+              defaultValue={user?.email}
               type="text"
               readOnly
             />

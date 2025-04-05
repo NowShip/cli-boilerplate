@@ -1,5 +1,5 @@
 import { SparklesIcon } from "lucide-react";
-import { useCreateOrder, useGetPlans } from "@/lemonsqueezy/queries";
+import { useCreateOrder, useGetPlans } from "@/paymant/usePayments";
 import { Button } from "../ui/button";
 import { formatPrice } from "@/lib/utils";
 
