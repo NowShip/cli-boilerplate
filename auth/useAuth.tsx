@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import type { APIError } from "better-auth";
@@ -64,6 +64,61 @@ export function useLogoutMutation() {
     },
     onError: (error) => {
       console.error(error);
+    },
+  });
+}
+
+export function useResetPassword() {
+  const token = useSearchParams().get("token");
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async ({
+      password,
+      email,
+    }: {
+      password?: string;
+      email?: string;
+    }) => {
+      if (password) {
+        if (!token) {
+          throw new Error("Token is required");
+        }
+
+        const { error } = await authClient.resetPassword({
+          newPassword: password,
+          token,
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return true;
+      }
+
+      if (email) {
+        const { error } = await authClient.forgetPassword({
+          email,
+          redirectTo: `/reset-password`,
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        return true;
+      }
+    },
+    onSuccess: (_, { email }) => {
+      if (email) {
+        toast.success("Password reset instructions sent");
+      } else {
+        toast.success("Password reset successfully");
+        router.push("/login");
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 }

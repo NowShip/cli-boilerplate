@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 import QueryClientProviders from "@/providers/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import PlansDialog from "@/components/plans-dialog";
 import ClientOnly from "@/components/client-only";
+import PlansDialog from "@/components/plans-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
