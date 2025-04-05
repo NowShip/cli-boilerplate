@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { processWebhookEvent } from "@/lemonsqueezy/action";
-import { webhookHasMeta, storeWebhookEvent } from "@/lemonsqueezy";
+import { processWebhookEvent } from "@/paymant/action";
+import { webhookHasMeta, storeWebhookEvent } from "@/paymant";
 
 export async function POST(request: Request) {
   if (!process.env.LEMONSQUEEZY_WEBHOOK_SECRET) {

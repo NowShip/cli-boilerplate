@@ -1,17 +1,17 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
+  getPlans,
   getUserSubscription,
   getCustomerPortalUrl,
   subscriptionSettings,
   createCheckout,
 } from "./action";
-import { useGetUser } from "@/hooks/useGetUser";
-import { toast } from "sonner";
+import { useGetUser } from "@/auth/useAuth";
 import type { LemonSqueezySubscriptionTypes } from "./index";
-import { getPlans } from "@/lib/action";
 
 export const useGetPlans = () => {
   return useQuery({
@@ -33,13 +33,13 @@ export const useGetUserSubscription = () => {
   const { data: user } = useGetUser();
 
   return useQuery({
-    queryKey: ["subscription", user?.user.id],
+    queryKey: ["subscription", user?.id],
     queryFn: async () => {
-      if (!user?.user.id) {
+      if (!user?.id) {
         throw new Error("User not found");
       }
 
-      const response = await getUserSubscription(user.user.id);
+      const response = await getUserSubscription(user.id);
 
       if (response.message) {
         throw new Error(response.message);
@@ -54,8 +54,9 @@ export const useGetUserSubscription = () => {
             : undefined,
       };
     },
-    enabled: !!user?.user.id,
+    enabled: !!user?.id,
     staleTime: 6000 * 60 * 1, // 1 hours
+    refetchOnWindowFocus: "always",
   });
 };
 
@@ -129,7 +130,7 @@ export const useCreateSubscription = () => {
 
       const response = await createCheckout({
         variantId: variantId.toString(),
-        userId: user.user.id,
+        userId: user.id,
         attributes: {
           productOptions: {
             redirectUrl: window.location.href,
