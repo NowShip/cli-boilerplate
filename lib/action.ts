@@ -19,18 +19,3 @@ export async function deleteTask(id: number) {
 export async function updateTask(id: number, title: string) {
   await db.update(tasksTable).set({ title }).where(eq(tasksTable.id, id));
 }
-
-export async function getPlans(): Promise<ServerResponse<PlanSelect[]>> {
-  try {
-    const result = await db.select().from(plans);
-
-    return {
-      data: result,
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      message: "Failed to fetch plans",
-    };
-  }
-}

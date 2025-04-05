@@ -5,9 +5,9 @@ import {
   useCreateSubscription,
   useGetPlans,
   useGetUserSubscription,
-} from "@/lemonsqueezy/queries";
+} from "@/paymant/usePayments";
 
-import { useGetUser } from "@/hooks/useGetUser";
+import { useGetUser } from "@/auth/useAuth";
 import { Button } from "./ui/button";
 import AuthDialog from "./auth-dialog";
 import { formatPrice } from "@/lib/utils";

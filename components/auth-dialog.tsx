@@ -16,8 +16,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useSignInWithGoogle } from "@/hooks/useAuth";
-import { useGetUser } from "@/hooks/useGetUser";
+import {
+  useSignInWithGoogle,
+  useGetUser,
+  useSignInWithEmail,
+} from "@/auth/useAuth";
 import { useLocalStorage } from "@uidotdev/usehooks";
 
 import {
@@ -28,7 +31,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { signIn } from "@/lib/auth-client";
+
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,12 +44,9 @@ export default function AuthDialog({
   onOpenChange,
 }: AuthDialogProps) {
   const [_, setShowPlanDialog] = useLocalStorage("show-plans-dialog", false);
+  const signIn = useSignInWithEmail();
 
   const { data: user } = useGetUser();
-
-  const queryClient = useQueryClient();
-
-  const [type, setType] = useState<"login" | "register">("login");
 
   const signInWithGoogleMutation = useSignInWithGoogle();
 
@@ -64,18 +64,17 @@ export default function AuthDialog({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { error } = await signIn.email({
-      email: values.email,
-      password: values.password,
-    });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      await queryClient.invalidateQueries({ queryKey: ["user"] });
-      setShowPlanDialog(true);
-      onOpenChange(false);
-    }
+    signIn.mutate(
+      {
+        email: values.email,
+        password: values.password,
+      },
+      {
+        onSuccess: () => {
+          setShowPlanDialog(true);
+        },
+      }
+    );
   }
 
   return (
@@ -154,7 +153,13 @@ export default function AuthDialog({
 
         <Button
           variant="outline"
-          onClick={() => signInWithGoogleMutation.mutate()}
+          onClick={() =>
+            signInWithGoogleMutation.mutate(undefined, {
+              onSuccess: () => {
+                localStorage.setItem("show-plans-dialog", "true");
+              },
+            })
+          }
           disabled={signInWithGoogleMutation.isPending}
         >
           Login with Google

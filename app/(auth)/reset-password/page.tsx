@@ -19,8 +19,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import { useGetUser } from "@/hooks/useGetUser";
+import { authClient } from "@/auth/auth-client";
+import { useGetUser } from "@/auth/useAuth";
 
 const formSchema = z.object({
   email: z.string().email().optional(),

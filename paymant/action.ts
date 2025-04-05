@@ -10,6 +10,7 @@ import {
   Order,
   orders,
   plans,
+  PlanSelect,
   Subscription,
   subscriptions,
   webhookEvents,
@@ -315,6 +316,21 @@ export async function subscriptionSettings({
 
     return {
       message: err.response?.data.errors[0].detail || "Error",
+    };
+  }
+}
+
+export async function getPlans(): Promise<ServerResponse<PlanSelect[]>> {
+  try {
+    const result = await db.select().from(plans);
+
+    return {
+      data: result,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Failed to fetch plans",
     };
   }
 }

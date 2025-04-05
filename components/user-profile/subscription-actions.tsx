@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { useSubscriptionSettings } from "@/lemonsqueezy/queries";
+import { useSubscriptionSettings } from "@/paymant/usePayments";
 
 import {
   AlertDialog,

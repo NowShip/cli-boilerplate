@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CheckIcon, RefreshCcwIcon } from "lucide-react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { format } from "date-fns";
@@ -25,7 +25,7 @@ import {
   useGetPlans,
   useGetUserSubscription,
   useSubscriptionSettings,
-} from "@/lemonsqueezy/queries";
+} from "@/paymant/usePayments";
 import { Badge } from "./ui/badge";
 
 interface PlansDialogProps {
@@ -53,14 +53,6 @@ export default function PlansDialog({
   const updateSubscription = useSubscriptionSettings();
 
   const isChangePlan = userSubscription.data?.status === "active";
-
-  // useEffect(() => {
-  //   if (userSubscription.data?.variantId) {
-  //     setSelectedPlan(userSubscription.data?.variantId.toString());
-  //   } else if (plans.data && !selectedPlan) {
-  //     setSelectedPlan(plans.data?.[1].variantId.toString() || null);
-  //   }
-  // }, [plans.data]);
 
   return (
     <AlertDialog
