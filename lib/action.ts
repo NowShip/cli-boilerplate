@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { Plan, plans, PlanSelect, tasksTable } from "@/db/schema";
+import { tasksTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function createTask(title: string) {

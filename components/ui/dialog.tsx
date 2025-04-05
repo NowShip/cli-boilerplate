@@ -4,7 +4,6 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 import { cn } from "@/lib/utils";
-import { XIcon } from "lucide-react";
 
 function Dialog({
   ...props
@@ -25,29 +24,9 @@ function DialogPortal({
 }
 
 function DialogClose({
-  children,
-  className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return (
-    <DialogPrimitive.Close
-      data-slot="dialog-close"
-      className={cn(
-        "",
-        !children &&
-          "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      {...props}
-    >
-      {children || (
-        <>
-          <XIcon />
-          <span className="sr-only">Close</span>
-        </>
-      )}
-    </DialogPrimitive.Close>
-  );
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
 function DialogOverlay({
@@ -58,8 +37,8 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "no-scrollbar data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80",
-        "grid place-items-center overflow-y-auto py-12",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80 py-12",
+        "grid place-items-center overflow-y-auto",
         className
       )}
       {...props}
@@ -70,20 +49,23 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
-  overlayClassName,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  overlayClassName?: string;
-}) {
+}: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay className={overlayClassName}>
+      <DialogOverlay>
         <DialogPrimitive.Content
           data-slot="dialog-content"
           className={cn(
             "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 relative z-50 grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
             className
           )}
+          // style={{
+          //   maxWidth: "300px",
+          //   background: "white",
+          //   padding: "30px",
+          //   borderRadius: "4px",
+          // }}
           {...props}
         >
           {children}

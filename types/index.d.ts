@@ -8,8 +8,3 @@ interface UserData {
   updatedAt: Date;
   role?: string | null;
 }
-
-interface ServerResponse<T> {
-  data?: T | null;
-  message?: string | null;
-}
