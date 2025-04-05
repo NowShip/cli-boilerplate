@@ -19,14 +19,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import { useGetUser } from "@/hooks/useGetUser";
+import { useResetPassword } from "@/auth/useAuth";
 
-const formSchema = z.object({
-  email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
-  confirmPassword: z.string().min(8).optional(),
-});
+const formSchema = z
+  .object({
+    email: z.string().email().optional(),
+    password: z.string().min(8).optional(),
+    confirmPassword: z.string().min(8).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.password && data.confirmPassword) {
+        return data.password === data.confirmPassword;
+      }
+      return true;
+    },
+    {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    }
+  );
 
 export default function ResetPasswordPage() {
   return (
@@ -37,7 +49,7 @@ export default function ResetPasswordPage() {
 }
 
 function Content() {
-  const { data: user } = useGetUser();
+  const resetPassword = useResetPassword();
 
   const token = useSearchParams().get("token");
 
@@ -59,42 +71,19 @@ function Content() {
         return;
       }
 
-      const { error } = await authClient.resetPassword({
-        newPassword: values.password,
-        token,
+      resetPassword.mutate({
+        password: values.password,
       });
-
-      console.log("running");
-
-      if (error) {
-        toast.error(error.message || "Something went wrong");
-      } else {
-        toast.success("Password reset successfully");
-        router.push("/login");
-      }
-      return;
-    }
-
-    if (!values.email) {
-      toast.error("Email is required");
-      return;
-    }
-
-    const { error } = await authClient.forgetPassword({
-      email: values.email,
-      redirectTo: `/reset-password`,
-    });
-
-    if (error) {
-      toast.error(error.message || "Something went wrong");
     } else {
-      toast.success("Password reset instructions sent");
-      form.reset();
-    }
-  }
+      if (!values.email) {
+        toast.error("Email is required");
+        return;
+      }
 
-  if (user) {
-    router.push("/");
+      resetPassword.mutate({
+        email: values.email,
+      });
+    }
   }
 
   return (
