@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-import { useGetUser } from "@/hooks/useGetUser";
+import { useGetUser } from "@/auth/useAuth";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
-import { useDeleteAccount, useLogoutMutation } from "@/hooks/useAuth";
+import { useDeleteAccount, useLogoutMutation } from "@/auth/useAuth";
 
 import {
   AlertDialog,
@@ -32,24 +32,24 @@ export default function UserProfile() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Avatar>
-          <AvatarImage src={user.user.image ?? undefined} />
+          <AvatarImage src={user.image ?? undefined} />
           <AvatarFallback>
-            {user.user.name.charAt(0)}
-            {user.user.name.charAt(1)}
+            {user.name?.charAt(0)}
+            {user.name?.charAt(1)}
           </AvatarFallback>
         </Avatar>
       </DialogTrigger>
       <DialogContent className="flex flex-col items-center gap-2 text-center sm:max-w-80">
         <Avatar className="h-18 w-18">
-          <AvatarImage src={user.user.image ?? undefined} />
+          <AvatarImage src={user.image ?? undefined} />
           <AvatarFallback>
-            {user.user.name.charAt(0)}
-            {user.user.name.charAt(1)}
+            {user.name?.charAt(0)}
+            {user.name?.charAt(1)}
           </AvatarFallback>
         </Avatar>
         <div className="overflow-hidden">
-          <p className="truncate text-sm font-medium">{user.user.name}</p>
-          <p className="truncate text-xs text-gray-500">{user.user.email}</p>
+          <p className="truncate text-sm font-medium">{user.name}</p>
+          <p className="truncate text-xs text-gray-500">{user.email}</p>
         </div>
         <Separator className="my-4" />
         <div className="flex w-full flex-col gap-2">

@@ -8,8 +8,8 @@ import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTask, deleteTask, getTasks } from "@/lib/action";
-import { useGetUser } from "@/hooks/useGetUser";
-import { useLogoutMutation } from "@/hooks/useAuth";
+import { useGetUser } from "@/auth/useAuth";
+import { useLogoutMutation } from "@/auth/useAuth";
 import UserProfile from "@/components/user-profile";
 
 export default function Home() {
