@@ -10,6 +10,7 @@ import {
   Order,
   orders,
   plans,
+  PlanSelect,
   webhookEvents,
   type WebhookEvent,
 } from "@/db/schema";
@@ -109,6 +110,21 @@ export async function processWebhookEvent(webhookEvent: WebhookEvent) {
       processingError,
     })
     .where(eq(webhookEvents.id, webhookEvent.id));
+}
+
+export async function getPlans(): Promise<ServerResponse<PlanSelect[]>> {
+  try {
+    const result = await db.select().from(plans);
+
+    return {
+      data: result,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Failed to fetch plans",
+    };
+  }
 }
 
 export async function createCheckout({

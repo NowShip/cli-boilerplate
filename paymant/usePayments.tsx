@@ -2,10 +2,9 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import { createCheckout, getUserOrder } from "./action";
-import { useGetUser } from "@/hooks/useGetUser";
+import { createCheckout, getPlans, getUserOrder } from "./action";
+import { useGetUser } from "@/auth/useAuth";
 import { toast } from "sonner";
-import { getPlans } from "@/lib/action";
 
 export const useGetPlans = () => {
   return useQuery({
@@ -28,13 +27,13 @@ export const useGetUserOrder = () => {
   const { data: user } = useGetUser();
 
   return useQuery({
-    queryKey: ["order", user?.user.id],
+    queryKey: ["order", user?.id],
     queryFn: async () => {
-      if (!user?.user.id) {
+      if (!user?.id) {
         throw new Error("User not found");
       }
 
-      const response = await getUserOrder(user.user.id);
+      const response = await getUserOrder(user.id);
 
       if (response.message) {
         throw new Error(response.message);
@@ -42,7 +41,7 @@ export const useGetUserOrder = () => {
 
       return response.data;
     },
-    enabled: !!user?.user.id,
+    enabled: !!user?.id,
     staleTime: 6000 * 60 * 1, // 1 hours
     refetchOnWindowFocus: "always",
   });
@@ -59,7 +58,7 @@ export const useCreateOrder = () => {
 
       const response = await createCheckout({
         variantId: variantId.toString(),
-        userId: user.user.id,
+        userId: user.id,
         attributes: {
           productOptions: {
             redirectUrl: window.location.href,

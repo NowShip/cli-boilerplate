@@ -23,7 +23,7 @@ import {
   useCreateOrder,
   useGetPlans,
   useGetUserOrder,
-} from "@/lemonsqueezy/queries";
+} from "@/paymant/usePayments";
 import { Badge } from "./ui/badge";
 
 interface PlansDialogProps {

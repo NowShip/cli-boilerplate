@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "../ui/button";
-import { useCreateOrder, useGetPlans } from "@/lemonsqueezy/queries";
+import { useCreateOrder, useGetPlans } from "@/paymant/usePayments";
 
 export default function Refunded() {
   const createOrder = useCreateOrder();

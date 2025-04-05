@@ -3,15 +3,15 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { useGetUser } from "@/hooks/useGetUser";
-import { useLogoutMutation } from "@/hooks/useAuth";
+import { useGetUser } from "@/auth/useAuth";
+import { useLogoutMutation } from "@/auth/useAuth";
 import UserProfile from "@/components/user-profile";
 import { cn } from "@/lib/utils";
 
 import Pricing from "@/components/pricing";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Avatar } from "@/components/ui/avatar";
-import { useGetUserOrder } from "@/lemonsqueezy/queries";
+import { useGetUserOrder } from "@/paymant/usePayments";
 
 export default function Home() {
   const { data: user, isPending: isUserPending } = useGetUser();
@@ -25,10 +25,8 @@ export default function Home() {
         {user && (
           <UserProfile>
             <Avatar>
-              <AvatarImage src={user?.user.image || ""} />
-              <AvatarFallback>
-                {user?.user.name?.charAt(0) || "U"}
-              </AvatarFallback>
+              <AvatarImage src={user?.image || ""} />
+              <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
           </UserProfile>
         )}
